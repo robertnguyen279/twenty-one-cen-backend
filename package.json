@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "serverless offline start --stage dev",
     "lint": "eslint --ext .js,.ts",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@babel/core": "^7.17.8",
@@ -37,12 +38,7 @@
     "webpack": "^5.70.0",
     "webpack-node-externals": "^3.0.0"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn format && yarn lint"
-    }
-  },
   "devDependencies": {
-    "husky": "^7.0.4"
+    "husky": "^7.0.0"
   }
 }
