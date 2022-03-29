@@ -41,5 +41,11 @@
     "hooks": {
       "pre-commit": "cross-env FORCE_COLOR=1 lint-staged"
     }
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown",
+    "src/**/*.{ts,tsx}": [
+      "eslint --fix --max-warnings 0"
+    ]
   }
 }
