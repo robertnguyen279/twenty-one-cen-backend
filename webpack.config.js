@@ -1,10 +1,10 @@
-const path = require('path')
-const nodeExternals = require('webpack-node-externals')
-const slsw = require('serverless-webpack')
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
+const path = require('path');
+const nodeExternals = require('webpack-node-externals');
+const slsw = require('serverless-webpack');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
-const isLocal = slsw.lib.webpack.isLocal
+const isLocal = slsw.lib.webpack.isLocal;
 
 module.exports = {
   mode: isLocal ? 'development' : 'production',
@@ -44,4 +44,4 @@ module.exports = {
     ]
   },
   plugins: [new ForkTsCheckerWebpackPlugin()]
-}
+};
