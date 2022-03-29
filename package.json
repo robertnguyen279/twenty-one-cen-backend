@@ -1,0 +1,34 @@
+{
+  "name": "twenty-one-cen-backend",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "serverless offline start --stage dev",
+    "lint": "eslint --ext .js,.ts ."
+  },
+  "dependencies": {
+    "@babel/core": "^7.17.8",
+    "@babel/eslint-parser": "^7.17.0",
+    "@babel/preset-env": "^7.16.11",
+    "@typescript-eslint/eslint-plugin": "^5.17.0",
+    "@typescript-eslint/parser": "^5.17.0",
+    "babel-loader": "^8.2.4",
+    "babel-plugin-source-map-support": "^2.1.3",
+    "cache-loader": "^4.1.0",
+    "dotenv": "^16.0.0",
+    "eslint": "^8.12.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-lodash": "^7.4.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "express": "^4.17.1",
+    "fork-ts-checker-webpack-plugin": "^7.2.1",
+    "prettier": "^2.6.1",
+    "serverless": "^3.10.0",
+    "serverless-http": "^2.7.0",
+    "serverless-offline": "^8.5.0",
+    "serverless-webpack": "^5.6.1",
+    "typescript": "^4.6.3",
+    "webpack": "^5.70.0",
+    "webpack-node-externals": "^3.0.0"
+  }
+}

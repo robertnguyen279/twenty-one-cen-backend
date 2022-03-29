@@ -1,0 +1,42 @@
+Arguments: 
+  /usr/bin/node /usr/bin/yarn install
+
+PATH: 
+  /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+
+Yarn version: 
+  1.22.18
+
+Node version: 
+  12.22.11
+
+Platform: 
+  linux x64
+
+Trace: 
+  SyntaxError: /home/robert/twenty-one-cen-backend/package.json: Unexpected string in JSON at position 154
+      at JSON.parse (<anonymous>)
+      at /usr/lib/node_modules/yarn/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/usr/lib/node_modules/yarn/lib/cli.js:310:30)
+      at /usr/lib/node_modules/yarn/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "twenty-one-cen-backend",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+      "start": "serverless offline start --stage dev"
+    }
+    "dependencies": {
+      "express": "^4.17.1",
+      "serverless-http": "^2.7.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

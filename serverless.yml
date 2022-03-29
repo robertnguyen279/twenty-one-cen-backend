@@ -1,0 +1,21 @@
+service: twenty-one-cen-backend
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    packager: 'yarn'
+    includeModules: true
+  serverless-offline:
+    useChildProcesses: true
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+functions:
+  api:
+    handler: handler.handler
+    events:
+      - httpApi: '*'
