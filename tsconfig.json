@@ -15,11 +15,6 @@
     ],
     "rootDir": "./",
     "resolveJsonModule": true,
-  },
-  "include": [
-    "**/*"
-  ],
-  "exclude": [
-    ".build"
-  ]
+    "baseUrl": "./",
+  }
 }

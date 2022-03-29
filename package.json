@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "serverless offline start --stage dev",
+    "dev": "serverless offline start --stage dev",
     "lint": "eslint --ext .js,.ts ."
   },
   "dependencies": {
     "@babel/core": "^7.17.8",
     "@babel/eslint-parser": "^7.17.0",
     "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
+    "@types/express": "^4.17.13",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
     "babel-loader": "^8.2.4",
@@ -22,13 +24,22 @@
     "eslint-plugin-prettier": "^4.0.0",
     "express": "^4.17.1",
     "fork-ts-checker-webpack-plugin": "^7.2.1",
+    "husky": "^7.0.4",
+    "mongoose": "^6.2.9",
+    "morgan": "^1.10.0",
     "prettier": "^2.6.1",
     "serverless": "^3.10.0",
     "serverless-http": "^2.7.0",
     "serverless-offline": "^8.5.0",
     "serverless-webpack": "^5.6.1",
+    "tsconfig-paths-webpack-plugin": "^3.5.2",
     "typescript": "^4.6.3",
     "webpack": "^5.70.0",
     "webpack-node-externals": "^3.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "cross-env FORCE_COLOR=1 lint-staged"
+    }
   }
 }

@@ -1,21 +1,30 @@
 service: twenty-one-cen-backend
 frameworkVersion: '3'
 
-provider:
-  name: aws
-  runtime: nodejs14.x
+custom:
   webpack:
     webpackConfig: 'webpack.config.js'
-    packager: 'yarn'
     includeModules: true
   serverless-offline:
     useChildProcesses: true
 
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'ap-southeast-1'}
+  apiGateway:
+    minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+  environment:
+    DEBUG: '*'
+    NODE_ENV: ${self:provider.stage}
+
 plugins:
   - serverless-webpack
   - serverless-offline
+
 functions:
   api:
-    handler: handler.handler
+    handler: index.handler
     events:
       - httpApi: '*'

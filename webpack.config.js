@@ -1,9 +1,10 @@
-const path = require('path');
-const nodeExternals = require('webpack-node-externals');
-const slsw = require('serverless-webpack');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const path = require('path')
+const nodeExternals = require('webpack-node-externals')
+const slsw = require('serverless-webpack')
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
 
-const isLocal = slsw.lib.webpack.isLocal;
+const isLocal = slsw.lib.webpack.isLocal
 
 module.exports = {
   mode: isLocal ? 'development' : 'production',
@@ -12,11 +13,16 @@ module.exports = {
   devtool: 'source-map',
   resolve: {
     extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
+    plugins: [
+      new TsconfigPathsPlugin({
+        /* options: see below */
+      })
+    ]
   },
   output: {
     libraryTarget: 'commonjs2',
     path: path.join(__dirname, '.webpack'),
-    filename: '[name].js',
+    filename: '[name].js'
   },
   target: 'node',
   module: {
@@ -29,13 +35,13 @@ module.exports = {
           {
             loader: 'cache-loader',
             options: {
-              cacheDirectory: path.resolve('.webpackCache'),
-            },
+              cacheDirectory: path.resolve('.webpackCache')
+            }
           },
-          'babel-loader',
-        ],
-      },
-    ],
+          'babel-loader'
+        ]
+      }
+    ]
   },
-  plugins: [new ForkTsCheckerWebpackPlugin()],
-};
+  plugins: [new ForkTsCheckerWebpackPlugin()]
+}
