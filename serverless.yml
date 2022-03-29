@@ -18,6 +18,7 @@ provider:
   environment:
     DEBUG: '*'
     NODE_ENV: ${self:provider.stage}
+    MONGO_URL: ${file(env.yml):MONGO_URL}
 
 plugins:
   - serverless-webpack
