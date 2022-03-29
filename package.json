@@ -25,7 +25,6 @@
     "eslint-plugin-prettier": "^4.0.0",
     "express": "^4.17.1",
     "fork-ts-checker-webpack-plugin": "^7.2.1",
-    "husky": "^7.0.4",
     "mongoose": "^6.2.9",
     "morgan": "^1.10.0",
     "prettier": "^2.6.1",
@@ -42,5 +41,8 @@
     "hooks": {
       "pre-commit": "yarn format && yarn lint"
     }
+  },
+  "devDependencies": {
+    "husky": "^7.0.4"
   }
 }
