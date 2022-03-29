@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "dev": "serverless offline start --stage dev",
-    "lint": "eslint --ext .js,.ts ."
+    "lint": "eslint --ext .js,.ts",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@babel/core": "^7.17.8",
@@ -39,13 +40,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "cross-env FORCE_COLOR=1 lint-staged"
+      "pre-commit": "yarn format && yarn lint"
     }
-  },
-  "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown",
-    "**/*.{ts,tsx}": [
-      "eslint --fix --max-warnings 0"
-    ]
   }
 }
