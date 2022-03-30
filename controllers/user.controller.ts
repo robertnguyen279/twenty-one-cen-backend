@@ -17,6 +17,8 @@ export const createUser = async (req: Request, res: Response) => {
     return res.status(201).send({ ...user._doc, accessToken, refreshToken, password: undefined });
   } catch (error) {
     if (error.message.includes('Invalid request body key')) {
+      console.error(error);
+
       res.status(422);
     } else {
       res.status(400);
@@ -49,6 +51,8 @@ export const loginUser = async (req: Request, res: Response) => {
 
     return res.send({ ...user._doc, password: undefined, accessToken, refreshToken });
   } catch (error) {
+    console.error(error);
+
     if (error.message.includes('Invalid request body key') || error.message.includes('Incorrect password')) {
       res.status(422);
     } else {

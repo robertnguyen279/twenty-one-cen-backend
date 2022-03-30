@@ -134,7 +134,7 @@ userSchema.statics.verifyAccessToken = async function (token: string): Promise<U
   const user = await User.findById(userId).select('-refreshToken -password');
 
   if (!user) {
-    throw new Error('No user found');
+    throw new Error('User not found');
   }
 
   return user;
