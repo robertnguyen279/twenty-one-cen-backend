@@ -19,6 +19,10 @@ provider:
     DEBUG: '*'
     NODE_ENV: ${self:provider.stage}
     MONGO_URL: ${file(env.yml):MONGO_URL}
+    JWT_ACCESS_SECRET: ${file(env.yml):JWT_ACCESS_SECRET}
+    JWT_ACCESS_TIME: ${file(env.yml):JWT_ACCESS_TIME}
+    JWT_REFRESH_SECRET: ${file(env.yml):JWT_REFRESH_SECRET}
+    JWT_REFRESH_TIME: ${file(env.yml):JWT_REFRESH_TIME}
 
 plugins:
   - serverless-webpack

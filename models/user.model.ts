@@ -1,30 +1,101 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, models } from 'mongoose';
+import { UserDocument, UserModel } from 'types/user.type';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import validator from 'validator';
 
 const userSchema = new Schema(
   {
     firstName: {
       type: String,
-      trim: true
+      trim: true,
+      required: true,
+      validate: {
+        validator: (firstName: string) => {
+          return /^(?=.{1,50}$)[a-z]+(?:['_.\s][a-z]+)*$/gim.test(firstName);
+        },
+        message: 'First name is invalid'
+      }
     },
     lastName: {
       type: String,
-      trim: true
+      trim: true,
+      required: true,
+      validate: {
+        validator: (lastName: string) => {
+          return validator.isAlpha(lastName);
+        },
+        message: 'Last name is invalid'
+      }
     },
     email: {
       type: String,
       trim: true,
-      unique: true
+      unique: true,
+      required: true,
+      validate: {
+        validator: (email: string) => {
+          return validator.isEmail(email);
+        },
+        message: 'Email is invalid'
+      }
     },
     password: {
       type: String,
-      trim: true
+      required: true,
+      select: false,
+      min: 6,
+      max: 20,
+      validate: {
+        validator: (password: string) => {
+          return (
+            !/\s/.test(password) &&
+            validator.isStrongPassword(password, {
+              minLength: 6,
+              minUppercase: 0,
+              minSymbols: 0
+            })
+          );
+        },
+        message: 'Password must contain letters and numbers.'
+      }
     },
     avatarUrl: {
       type: String
     },
     role: {
       type: String,
-      enum: ['user', 'superviser', 'admin']
+      enum: ['user', 'superviser', 'admin'],
+      required: true,
+      default: 'user'
+    },
+    phone: {
+      type: Number
+    },
+    contactDetails: [
+      {
+        province: {
+          type: String,
+          required: true,
+          trim: true
+        },
+        district: {
+          type: String,
+          required: true,
+          trim: true
+        },
+        addressDetail: {
+          type: String,
+          required: true,
+          trim: true
+        }
+      }
+    ],
+    birthday: {
+      type: Date
+    },
+    refreshToken: {
+      type: String
     }
   },
   {
@@ -32,6 +103,28 @@ const userSchema = new Schema(
   }
 );
 
-const User = model('User', userSchema);
+userSchema.pre('save', async function (next): Promise<void> {
+  this.password = await bcrypt.hash(this.password, 8);
+  next();
+});
+
+userSchema.methods.generateAccessToken = async function (): Promise<string> {
+  const accessToken = await jwt.sign({ userId: this._id }, process.env.JWT_ACCESS_SECRET as string, {
+    expiresIn: process.env.JWT_ACCESS_TIME
+  });
+
+  return accessToken;
+};
+
+userSchema.methods.generateRefreshToken = async function (): Promise<string> {
+  const refreshToken = await jwt.sign({ userId: this._id }, process.env.JWT_REFRESH_SECRET as string, {
+    expiresIn: process.env.JWT_REFRESH_TIME
+  });
+
+  this.refreshToken = refreshToken;
+  return refreshToken;
+};
+
+const User = (models.User as UserModel) || model<UserDocument, UserModel>('User', userSchema);
 
 export default User;

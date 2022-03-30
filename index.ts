@@ -8,7 +8,7 @@ const app = express();
 
 app.use(morgan('dev'));
 app.use(express.json());
-app.use('/users', userRoutes);
+app.use('/user', userRoutes);
 
 export const handler = serverless(app, {
   async request(request, event, context) {
