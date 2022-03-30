@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 mongoose.Promise = global.Promise;
 let isConnected: boolean | number;
 
-const connectToDatabase = (): Promise<any> => {
+const connectToDatabase = () => {
   if (isConnected) {
     console.log('=> Using existing database connection.');
     return Promise.resolve();
