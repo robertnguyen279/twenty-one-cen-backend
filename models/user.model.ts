@@ -43,7 +43,6 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: true,
-      select: false,
       min: 6,
       max: 20,
       validate: {
@@ -123,6 +122,22 @@ userSchema.methods.generateRefreshToken = async function (): Promise<string> {
 
   this.refreshToken = refreshToken;
   return refreshToken;
+};
+
+userSchema.methods.comparePassword = function (password: string): boolean {
+  return bcrypt.compareSync(password, this.password);
+};
+
+userSchema.statics.verifyAccessToken = async function (token: string): Promise<UserDocument> {
+  const { userId } = await (<jwt.UserIDJwtPayload>jwt.verify(token, process.env.JWT_ACCESS_SECRET as string));
+
+  const user = await User.findById(userId).select('-refreshToken -password');
+
+  if (!user) {
+    throw new Error('No user found');
+  }
+
+  return user;
 };
 
 const User = (models.User as UserModel) || model<UserDocument, UserModel>('User', userSchema);
