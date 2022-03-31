@@ -7,7 +7,7 @@ import validator from 'validator';
 
 const signupKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday'];
 const signupByAdminKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday', 'role'];
-const loginKeys = ['email', 'password'];
+const loginKeys = ['emailOrPhone', 'password'];
 const addressKeys = ['province', 'district', 'addressDetail', 'phone'];
 
 export const createUser = async (req: Request, res: Response) => {
@@ -37,9 +37,14 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const loginUser = async (req: Request, res: Response) => {
   try {
-    const { email, password } = filterRequestBody(loginKeys, req.body);
+    const { emailOrPhone, password } = filterRequestBody(loginKeys, req.body);
+    let user;
 
-    const user = await User.findOne({ email }).select('-refreshToken');
+    if (validator.isEmail(emailOrPhone)) {
+      user = await User.findOne({ email: emailOrPhone }).select('-refreshToken');
+    } else if (validator.isMobilePhone(emailOrPhone.toString(), ['vi-VN'])) {
+      user = await User.findOne({ phone: emailOrPhone }).select('-refreshToken');
+    }
 
     if (!user) {
       throw new Error('No user found');
@@ -80,6 +85,11 @@ export const updateUser = async (req: Request, res: Response) => {
   try {
     const user = req.authUser as UserDocument;
     filterRequestBody(signupKeys, req.body);
+
+    if (req.body.phone && !validator.isMobilePhone(req.body.phone.toString(), ['vi-VN'])) {
+      throw new Error('Phone is not valid');
+    }
+
     for (const key in req.body) {
       user[key] = req.body[key];
     }
