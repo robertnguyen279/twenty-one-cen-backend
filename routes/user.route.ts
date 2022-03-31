@@ -6,26 +6,29 @@ import {
   updateUser,
   getUserById,
   createUserByAdmin,
-  updateUserByAdmin,
-  deleteUserByAdmin,
+  updateUserBySuperviser,
+  deleteUserBySuperviser,
   getUsers,
   addContact,
-  updateContact
+  updateContact,
+  deleteContact
 } from 'controllers/user.controller';
 import authMiddleware from 'middlewares/auth.middleware';
+import superviserMiddleware from 'middlewares/superviser.middleware';
 import adminMiddleware from 'middlewares/admin.middleware';
 const router = express.Router();
 
 router.post('/', createUser);
-router.post('/admin', authMiddleware, adminMiddleware, createUserByAdmin);
+router.post('/admin', authMiddleware, superviserMiddleware, adminMiddleware, createUserByAdmin);
 router.post('/contact', authMiddleware, addContact);
 router.patch('/contact/:id', authMiddleware, updateContact);
+router.delete('/contact/:id', authMiddleware, deleteContact);
 router.patch('/', authMiddleware, updateUser);
 router.post('/login', loginUser);
 router.get('/', authMiddleware, getUser);
-router.get('/admin', authMiddleware, adminMiddleware, getUsers);
-router.get('/:id', authMiddleware, adminMiddleware, getUserById);
-router.patch('/:id', authMiddleware, adminMiddleware, updateUserByAdmin);
-router.delete('/:id', authMiddleware, adminMiddleware, deleteUserByAdmin);
+router.get('/admin', authMiddleware, superviserMiddleware, getUsers);
+router.get('/:id', authMiddleware, superviserMiddleware, getUserById);
+router.patch('/:id', authMiddleware, superviserMiddleware, updateUserBySuperviser);
+router.delete('/:id', authMiddleware, superviserMiddleware, deleteUserBySuperviser);
 
 export default router;

@@ -158,7 +158,7 @@ export const createUserByAdmin = async (req: Request, res: Response) => {
   }
 };
 
-export const updateUserByAdmin = async (req: Request, res: Response) => {
+export const updateUserBySuperviser = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
     filterRequestBody(signupByAdminKeys, req.body);
@@ -185,7 +185,7 @@ export const updateUserByAdmin = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteUserByAdmin = async (req: Request, res: Response) => {
+export const deleteUserBySuperviser = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
 
@@ -278,5 +278,25 @@ export const updateContact = async (req: Request, res: Response) => {
     console.error(error);
 
     return res.status(400).send({ message: error.message });
+  }
+};
+
+export const deleteContact = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const user = req.authUser as UserDocument;
+
+    await User.findByIdAndUpdate({ _id: user._id }, { $pull: { contactDetails: { _id: id } } });
+    return res.send({ message: 'Contact deleted' });
+  } catch (error) {
+    console.error(error);
+
+    if (error.message.includes('Contact not found')) {
+      res.status(404);
+    } else {
+      res.status(400);
+    }
+
+    res.send({ message: error.message });
   }
 };
