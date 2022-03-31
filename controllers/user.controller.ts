@@ -2,10 +2,13 @@ import { Request, Response } from 'express';
 import User from 'models/user.model';
 import { filterRequestBody } from 'services/common.service';
 import { UserDocument } from 'types/user.type';
+import { Types } from 'mongoose';
+import validator from 'validator';
 
 const signupKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday'];
 const signupByAdminKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday', 'role'];
 const loginKeys = ['email', 'password'];
+const addressKeys = ['province', 'district', 'addressDetail', 'phone'];
 
 export const createUser = async (req: Request, res: Response) => {
   try {
@@ -213,5 +216,57 @@ export const getUsers = async (req: Request, res: Response) => {
     console.error(error);
 
     res.status(400).send({ message: error.message });
+  }
+};
+
+export const addContact = async (req: Request, res: Response) => {
+  try {
+    const user = req.authUser as UserDocument;
+    filterRequestBody(addressKeys, req.body);
+
+    const _id = new Types.ObjectId();
+    const contactDetail = {
+      _id,
+      ...req.body
+    };
+
+    user.contactDetails?.push(contactDetail);
+    await user.save();
+
+    res.send({ message: 'Add contact successfully' });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(400).send({ message: error.message });
+  }
+};
+
+export const updateContact = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const user = req.authUser as UserDocument;
+    filterRequestBody(addressKeys, req.body);
+
+    const updateArgs = {};
+
+    for (const key in req.body) {
+      updateArgs[`contactDetails.$.${key}`] = req.body[key];
+    }
+
+    if (req.body.phone && !validator.isMobilePhone(req.body.phone.toString(), ['vi-VN'])) {
+      throw new Error('Phone is not valid');
+    }
+
+    const doc = await User.findOneAndUpdate({ _id: user._id, 'contactDetails._id': id }, updateArgs, { new: true });
+
+    if (!doc) {
+      throw new Error('Update contact failed');
+    }
+
+    return res.send({ message: 'Contact updated' });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(400).send({ message: error.message });
   }
 };

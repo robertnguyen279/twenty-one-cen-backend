@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose';
+import { Schema, model, models, Types } from 'mongoose';
 import { UserDocument, UserModel } from 'types/user.type';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -32,12 +32,22 @@ const userSchema = new Schema(
       type: String,
       trim: true,
       unique: true,
-      required: true,
       validate: {
         validator: (email: string) => {
           return validator.isEmail(email);
         },
         message: 'Email is invalid'
+      }
+    },
+    phone: {
+      type: Number,
+      required: true,
+      unique: true,
+      validate: {
+        validator: (phone: number) => {
+          return validator.isMobilePhone(phone.toString(), ['vi-VN']);
+        },
+        message: 'Phone is invalid'
       }
     },
     password: {
@@ -68,11 +78,13 @@ const userSchema = new Schema(
       required: true,
       default: 'user'
     },
-    phone: {
-      type: Number
-    },
     contactDetails: [
       {
+        _id: {
+          type: Types.ObjectId,
+          unique: true,
+          required: true
+        },
         province: {
           type: String,
           required: true,
@@ -87,6 +99,15 @@ const userSchema = new Schema(
           type: String,
           required: true,
           trim: true
+        },
+        phone: {
+          type: Number,
+          validate: {
+            validator: (phone: number) => {
+              return validator.isMobilePhone(phone.toString(), ['vi-VN']);
+            },
+            message: 'Phone is invalid'
+          }
         }
       }
     ],
