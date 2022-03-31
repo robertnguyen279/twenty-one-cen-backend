@@ -225,7 +225,7 @@ export const getUsers = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
 
-    res.status(400).send({ message: error.message });
+    return res.status(400).send({ message: error.message });
   }
 };
 
@@ -243,7 +243,7 @@ export const addContact = async (req: Request, res: Response) => {
     user.contactDetails?.push(contactDetail);
     await user.save();
 
-    res.send({ message: 'Add contact successfully' });
+    return res.send({ message: 'Add contact successfully' });
   } catch (error) {
     console.error(error);
 
@@ -297,7 +297,7 @@ export const deleteContact = async (req: Request, res: Response) => {
       res.status(400);
     }
 
-    res.send({ message: error.message });
+    return res.send({ message: error.message });
   }
 };
 
@@ -330,6 +330,6 @@ export const logoutUser = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
 
-    res.status(400).send({ message: error.message });
+    return res.status(400).send({ message: error.message });
   }
 };
