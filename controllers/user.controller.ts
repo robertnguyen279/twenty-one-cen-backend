@@ -17,6 +17,7 @@ export const createUser = async (req: Request, res: Response) => {
 
     const accessToken = await user.generateAccessToken();
     const refreshToken = await user.generateRefreshToken();
+    console.log(user);
     await user.save();
 
     return res
@@ -167,7 +168,40 @@ export const updateUserBySuperviser = async (req: Request, res: Response) => {
       req.body.password = await User.generateHashPassword(req.body.password);
     }
 
-    await User.findOneAndUpdate({ _id: id }, req.body);
+    const doc = await User.findOneAndUpdate({ _id: id, role: 'user' }, req.body);
+
+    if (!doc) {
+      throw new Error('No user found');
+    }
+
+    return res.send({ message: 'Update user successfully' });
+  } catch (error) {
+    console.error(error);
+
+    if (error.message.includes('Invalid request body key')) {
+      console.error(error);
+
+      res.status(422);
+    } else if (error.message.includes('No user found')) {
+      res.status(404);
+    } else {
+      res.status(400);
+    }
+
+    return res.send({ message: error.message });
+  }
+};
+
+export const updateUserByAdmin = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    filterRequestBody(signupByAdminKeys, req.body);
+
+    if (req.body.password) {
+      req.body.password = await User.generateHashPassword(req.body.password);
+    }
+
+    await User.findOneAndUpdate({ _id: id, role: { $in: ['user', 'superviser'] } }, req.body);
 
     return res.send({ message: 'Update user successfully' });
   } catch (error) {
@@ -189,7 +223,30 @@ export const deleteUserBySuperviser = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
 
-    const doc = await User.findByIdAndDelete(id);
+    const doc = await User.findOneAndDelete({ _id: id, role: 'user' });
+    if (!doc) {
+      throw new Error('No user found');
+    }
+
+    return res.send({ message: 'Delete user successfully' });
+  } catch (error) {
+    console.error(error);
+
+    if (error.message.includes('No user found')) {
+      res.status(404);
+    } else {
+      res.status(400);
+    }
+
+    return res.send({ message: error.message });
+  }
+};
+
+export const deleteUserByAdmin = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+
+    const doc = await User.findOneAndDelete({ _id: id, role: { $in: ['user', 'superviser'] } });
     if (!doc) {
       throw new Error('No user found');
     }
@@ -209,6 +266,7 @@ export const deleteUserBySuperviser = async (req: Request, res: Response) => {
 };
 
 export const getUsers = async (req: Request, res: Response) => {
+  console.log('heheheeh');
   try {
     const skip = req.query.skip ? parseInt(req.query.skip as string) : 0;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;

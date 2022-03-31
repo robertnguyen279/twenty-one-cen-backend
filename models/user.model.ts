@@ -82,7 +82,6 @@ const userSchema = new Schema(
       {
         _id: {
           type: Types.ObjectId,
-          unique: true,
           required: true
         },
         province: {
