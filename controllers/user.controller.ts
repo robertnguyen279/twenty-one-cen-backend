@@ -191,6 +191,27 @@ export const deleteUserByAdmin = async (req: Request, res: Response) => {
       res.status(400);
     }
 
-    res.send({ message: error.message });
+    return res.send({ message: error.message });
+  }
+};
+
+export const getUsers = async (req: Request, res: Response) => {
+  try {
+    const skip = req.query.skip ? parseInt(req.query.skip as string) : 0;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+    const sortBy = req.query.sortBy ? req.query.sortBy : 'createdAt';
+    const order = req.query.order ? req.query.order : 'desc';
+
+    const users = await User.find()
+      .skip(skip)
+      .limit(limit)
+      .sort([[sortBy, order]])
+      .select('-refreshToken -password');
+
+    return res.send(users);
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).send({ message: error.message });
   }
 };

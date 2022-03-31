@@ -10,9 +10,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "lib": [
-      "es2017"
-    ],
+    "lib": ["es2017"],
     "rootDir": "./",
     "resolveJsonModule": true,
     "baseUrl": "./"
