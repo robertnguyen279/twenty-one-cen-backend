@@ -171,3 +171,26 @@ export const updateUserByAdmin = async (req: Request, res: Response) => {
     return res.send({ message: error.message });
   }
 };
+
+export const deleteUserByAdmin = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+
+    const doc = await User.findByIdAndDelete(id);
+    if (!doc) {
+      throw new Error('No user found');
+    }
+
+    return res.send({ message: 'Delete user successfully' });
+  } catch (error) {
+    console.error(error);
+
+    if (error.message.includes('No user found')) {
+      res.status(404);
+    } else {
+      res.status(400);
+    }
+
+    res.send({ message: error.message });
+  }
+};
