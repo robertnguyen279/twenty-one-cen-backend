@@ -27,6 +27,12 @@ export interface User {
 export interface UserDocument extends User, Document {
   generateAccessToken(): Promise<string>;
   generateRefreshToken(): Promise<string>;
+  fullName: string;
+  comparePassword(password: string): string;
+  _doc: User;
 }
 
-export type UserModel = Model<UserDocument>;
+export interface UserModel extends Model<UserDocument> {
+  verifyAccessToken(token): Promise<UserDocument>;
+  generateHashPassword(password: string): Promise<string>;
+}
