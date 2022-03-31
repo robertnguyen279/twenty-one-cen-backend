@@ -142,6 +142,14 @@ userSchema.statics.verifyAccessToken = async function (token: string): Promise<U
   return user;
 };
 
+userSchema.statics.generateHashPassword = async function (password: string): Promise<string> {
+  return bcrypt.hash(password, 8);
+};
+
+userSchema.virtual('fullName').get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
+
 const User = (models.User as UserModel) || model<UserDocument, UserModel>('User', userSchema);
 
 export default User;

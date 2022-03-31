@@ -22,10 +22,10 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
         res.status(400);
       }
 
-      res.send({ error: error.message });
+      return res.send({ error: error.message });
     }
   } else {
-    res.status(401).send({
+    return res.status(401).send({
       message: 'You are unauthorized'
     });
   }
