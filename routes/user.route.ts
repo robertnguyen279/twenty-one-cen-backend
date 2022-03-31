@@ -11,7 +11,9 @@ import {
   getUsers,
   addContact,
   updateContact,
-  deleteContact
+  deleteContact,
+  getAccessToken,
+  logoutUser
 } from 'controllers/user.controller';
 import authMiddleware from 'middlewares/auth.middleware';
 import superviserMiddleware from 'middlewares/superviser.middleware';
@@ -21,8 +23,10 @@ const router = express.Router();
 router.post('/', createUser);
 router.post('/admin', authMiddleware, superviserMiddleware, adminMiddleware, createUserByAdmin);
 router.post('/contact', authMiddleware, addContact);
+router.post('/token', getAccessToken);
 router.patch('/contact/:id', authMiddleware, updateContact);
 router.delete('/contact/:id', authMiddleware, deleteContact);
+router.delete('/logout', authMiddleware, logoutUser);
 router.patch('/', authMiddleware, updateUser);
 router.post('/login', loginUser);
 router.get('/', authMiddleware, getUser);

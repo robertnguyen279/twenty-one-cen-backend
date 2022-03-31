@@ -163,6 +163,18 @@ userSchema.statics.verifyAccessToken = async function (token: string): Promise<U
   return user;
 };
 
+userSchema.statics.verifyRefreshToken = async function (token: string): Promise<UserDocument> {
+  const { userId } = await (<jwt.UserIDJwtPayload>jwt.verify(token, process.env.JWT_REFRESH_SECRET as string));
+
+  const user = await User.findOne({ _id: userId, refreshToken: token }).select('-refreshToken -password');
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  return user;
+};
+
 userSchema.statics.generateHashPassword = async function (password: string): Promise<string> {
   return bcrypt.hash(password, 8);
 };

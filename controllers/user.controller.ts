@@ -300,3 +300,36 @@ export const deleteContact = async (req: Request, res: Response) => {
     res.send({ message: error.message });
   }
 };
+
+export const getAccessToken = async (req: Request, res: Response) => {
+  try {
+    const { token } = filterRequestBody(['token'], req.body);
+
+    const user = await User.verifyRefreshToken(token);
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
+    await user.save();
+
+    return res.send({
+      accessToken,
+      refreshToken
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(400).send({ message: error.message });
+  }
+};
+
+export const logoutUser = async (req: Request, res: Response) => {
+  try {
+    const user = req.authUser as UserDocument;
+
+    await User.updateOne({ _id: user._id }, { $unset: { refreshToken: 1 } });
+    return res.send({ message: 'Logout successfully' });
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).send({ message: error.message });
+  }
+};

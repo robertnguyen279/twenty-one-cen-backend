@@ -23,6 +23,7 @@ export interface User {
   role: Role;
   phone: number;
   birthday?: Date;
+  refreshToken: string;
   contactDetails?: Array<ContactDetail>;
 }
 
@@ -36,5 +37,6 @@ export interface UserDocument extends User, Document {
 
 export interface UserModel extends Model<UserDocument> {
   verifyAccessToken(token): Promise<UserDocument>;
+  verifyRefreshToken(token): Promise<UserDocument>;
   generateHashPassword(password: string): Promise<string>;
 }
