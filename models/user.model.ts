@@ -56,7 +56,7 @@ const userSchema = new Schema(
             })
           );
         },
-        message: 'Password must contain letters and numbers.'
+        message: 'Invalid password.'
       }
     },
     avatarUrl: {
@@ -103,7 +103,9 @@ const userSchema = new Schema(
 );
 
 userSchema.pre('save', async function (next): Promise<void> {
-  this.password = await bcrypt.hash(this.password, 8);
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 8);
+  }
   next();
 });
 

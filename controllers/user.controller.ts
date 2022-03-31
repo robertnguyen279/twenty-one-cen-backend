@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import User from 'models/user.model';
 import { filterRequestBody } from 'services/common.service';
+import { UserDocument } from 'types/user.type';
 
 const signupKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday'];
 const loginKeys = ['email', 'password'];
@@ -16,6 +17,8 @@ export const createUser = async (req: Request, res: Response) => {
 
     return res.status(201).send({ ...user._doc, accessToken, refreshToken, password: undefined });
   } catch (error) {
+    console.error(error);
+
     if (error.message.includes('Invalid request body key')) {
       console.error(error);
 
@@ -45,16 +48,16 @@ export const loginUser = async (req: Request, res: Response) => {
     const accessToken = await user.generateAccessToken();
     const refreshToken = await user.generateRefreshToken();
 
-    user.password = password;
-
     await user.save();
 
     return res.send({ ...user._doc, password: undefined, accessToken, refreshToken });
   } catch (error) {
     console.error(error);
 
-    if (error.message.includes('Invalid request body key') || error.message.includes('Incorrect password')) {
+    if (error.message.includes('Invalid request body key')) {
       res.status(422);
+    } else if (error.message.includes('Incorrect password')) {
+      res.status(403);
     } else {
       res.status(400);
     }
@@ -67,4 +70,29 @@ export const getUser = (req: Request, res: Response) => {
   const user = req.authUser;
 
   return res.send(user);
+};
+
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const user = req.authUser as UserDocument;
+    filterRequestBody(signupKeys, req.body);
+    for (const key in req.body) {
+      user[key] = req.body[key];
+    }
+    await user.save();
+
+    res.send({ message: 'Update user successfully' });
+  } catch (error) {
+    console.error(error);
+
+    if (error.message.includes('Invalid request body key')) {
+      console.error(error);
+
+      res.status(422);
+    } else {
+      res.status(400);
+    }
+
+    return res.send({ message: error.message });
+  }
 };
