@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import User from 'models/user.model';
 import { filterRequestBody } from 'services/common.service';
 import { UserDocument } from 'types/user.type';
@@ -10,29 +10,21 @@ const signupByAdminKeys = ['firstName', 'lastName', 'email', 'password', 'phone'
 const loginKeys = ['emailOrPhone', 'password'];
 const addressKeys = ['province', 'district', 'addressDetail', 'phone'];
 
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     filterRequestBody(signupKeys, req.body);
     const user = new User(req.body);
 
     const accessToken = await user.generateAccessToken();
     const refreshToken = await user.generateRefreshToken();
-    console.log(user);
+
     await user.save();
 
     return res
       .status(201)
       .send({ ...user._doc, accessToken, refreshToken, password: undefined, fullName: user.fullName });
   } catch (error) {
-    console.error(error);
-
-    if (error.message.includes('Invalid request body key')) {
-      res.status(422);
-    } else {
-      res.status(400);
-    }
-
-    return res.send({ message: error.message });
+    next(error);
   }
 };
 
