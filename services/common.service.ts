@@ -1,4 +1,4 @@
-import { InvalidBodyError } from 'models/error.model';
+import { InvalidBodyError } from 'services/error.service';
 
 export const filterRequestBody = <T>(validKeys: Array<string>, requestBody: T) => {
   for (const key in requestBody) {

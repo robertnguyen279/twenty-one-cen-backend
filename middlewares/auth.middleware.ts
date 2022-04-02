@@ -1,33 +1,24 @@
 import { Request, Response, NextFunction } from 'express';
 import User from 'models/user.model';
+import { ForbiddenError } from 'services/error.service';
 
 const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
-  const bearerHeader = req.headers['authorization'];
+  try {
+    const bearerHeader = req.headers['authorization'];
 
-  if (bearerHeader) {
-    const bearer = bearerHeader.split(' ');
-    const bearerToken = bearer[1];
-    try {
+    if (bearerHeader) {
+      const bearer = bearerHeader.split(' ');
+      const bearerToken = bearer[1];
       const user = await User.verifyAccessToken(bearerToken);
 
       req.authUser = user;
 
       next();
-    } catch (error) {
-      console.error(error);
-
-      if (error.message.includes('User not found')) {
-        res.status(404);
-      } else {
-        res.status(400);
-      }
-
-      return res.send({ error: error.message });
+    } else {
+      throw new ForbiddenError();
     }
-  } else {
-    return res.status(401).send({
-      message: 'You are unauthorized'
-    });
+  } catch (error) {
+    next(error);
   }
 };
 

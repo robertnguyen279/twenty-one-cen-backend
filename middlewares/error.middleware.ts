@@ -10,7 +10,7 @@ export const errorLogger = (error: ErrorType, req: Request, res: Response, next:
 export const errorResponder = (req: Request, res: Response, next: NextFunction) => {
   res.header('Content-Type', 'application/json');
   const error = req.error;
-  console.log(error);
+
   if (error && error.statusCode) {
     res.status(error.statusCode).send(error);
   } else if (error) {

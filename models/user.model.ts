@@ -1,5 +1,6 @@
 import { Schema, model, models, Types } from 'mongoose';
 import { UserDocument, UserModel } from 'types/user.type';
+import { NotFoundError, UnauthorizedError } from 'services/error.service';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import validator from 'validator';
@@ -151,27 +152,35 @@ userSchema.methods.comparePassword = function (password: string): boolean {
 };
 
 userSchema.statics.verifyAccessToken = async function (token: string): Promise<UserDocument> {
-  const { userId } = await (<jwt.UserIDJwtPayload>jwt.verify(token, process.env.JWT_ACCESS_SECRET as string));
+  try {
+    const { userId } = await (<jwt.UserIDJwtPayload>jwt.verify(token, process.env.JWT_ACCESS_SECRET as string));
 
-  const user = await User.findById(userId).select('-refreshToken -password');
+    const user = await User.findById(userId).select('-refreshToken -password');
 
-  if (!user) {
-    throw new Error('User not found');
+    if (!user) {
+      throw new NotFoundError('User');
+    }
+
+    return user;
+  } catch (error) {
+    throw new UnauthorizedError();
   }
-
-  return user;
 };
 
 userSchema.statics.verifyRefreshToken = async function (token: string): Promise<UserDocument> {
-  const { userId } = await (<jwt.UserIDJwtPayload>jwt.verify(token, process.env.JWT_REFRESH_SECRET as string));
+  try {
+    const { userId } = await (<jwt.UserIDJwtPayload>jwt.verify(token, process.env.JWT_REFRESH_SECRET as string));
 
-  const user = await User.findOne({ _id: userId, refreshToken: token }).select('-refreshToken -password');
+    const user = await User.findOne({ _id: userId, refreshToken: token }).select('-refreshToken -password');
 
-  if (!user) {
-    throw new Error('User not found');
+    if (!user) {
+      throw new NotFoundError('User');
+    }
+
+    return user;
+  } catch (error) {
+    throw new UnauthorizedError();
   }
-
-  return user;
 };
 
 userSchema.statics.generateHashPassword = async function (password: string): Promise<string> {

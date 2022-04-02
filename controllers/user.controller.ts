@@ -4,6 +4,7 @@ import { filterRequestBody } from 'services/common.service';
 import { UserDocument } from 'types/user.type';
 import { Types } from 'mongoose';
 import validator from 'validator';
+import { NotFoundError, ForbiddenError, InvalidBodyError } from 'services/error.service';
 
 const signupKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday'];
 const signupByAdminKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday', 'role'];
@@ -20,15 +21,19 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 
     await user.save();
 
-    return res
-      .status(201)
-      .send({ ...user._doc, accessToken, refreshToken, password: undefined, fullName: user.fullName });
+    return res.status(201).send({
+      statusCode: 201,
+      message: 'Create user successfully',
+      accessToken,
+      refreshToken,
+      user: { ...user._doc, password: undefined, fullName: user.fullName }
+    });
   } catch (error) {
     next(error);
   }
 };
 
-export const loginUser = async (req: Request, res: Response) => {
+export const loginUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { emailOrPhone, password } = filterRequestBody(loginKeys, req.body);
     let user;
@@ -40,11 +45,11 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 
     if (!user) {
-      throw new Error('No user found');
+      throw new NotFoundError('User');
     }
 
     if (!user.comparePassword(password)) {
-      throw new Error('Incorrect password');
+      throw new ForbiddenError();
     }
 
     const accessToken = await user.generateAccessToken();
@@ -52,35 +57,35 @@ export const loginUser = async (req: Request, res: Response) => {
 
     await user.save();
 
-    return res.send({ ...user._doc, password: undefined, accessToken, refreshToken });
+    return res.send({
+      statusCode: 200,
+      message: 'Login successful',
+      accessToken,
+      refreshToken,
+      user: { ...user._doc, password: undefined, fullName: user.fullName }
+    });
   } catch (error) {
-    console.error(error);
-
-    if (error.message.includes('Invalid request body key')) {
-      res.status(422);
-    } else if (error.message.includes('Incorrect password')) {
-      res.status(403);
-    } else {
-      res.status(400);
-    }
-
-    return res.send({ message: error.message });
+    next(error);
   }
 };
 
 export const getUser = (req: Request, res: Response) => {
   const user = req.authUser as UserDocument;
 
-  return res.send({ ...user._doc, fullName: user.fullName });
+  return res.send({
+    message: 'Get user successfully',
+    statusCode: 200,
+    user: { ...user._doc, fullName: user.fullName }
+  });
 };
 
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.authUser as UserDocument;
     filterRequestBody(signupKeys, req.body);
 
     if (req.body.phone && !validator.isMobilePhone(req.body.phone.toString(), ['vi-VN'])) {
-      throw new Error('Phone is not valid');
+      throw new InvalidBodyError('phone');
     }
 
     for (const key in req.body) {
@@ -88,70 +93,49 @@ export const updateUser = async (req: Request, res: Response) => {
     }
     await user.save();
 
-    return res.send({ message: 'Update user successfully' });
+    return res.send({ message: 'Update user successfully', statusCode: 200 });
   } catch (error) {
-    console.error(error);
-
-    if (error.message.includes('Invalid request body key')) {
-      console.error(error);
-
-      res.status(422);
-    } else {
-      res.status(400);
-    }
-
-    return res.send({ message: error.message });
+    next(error);
   }
 };
 
-export const getUserById = async (req: Request, res: Response) => {
+export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id;
 
     const user = await User.findById(id).select('-refreshToken -password');
 
     if (!user) {
-      throw new Error('No user found');
+      throw new NotFoundError('User');
     }
 
-    return res.send({ ...user._doc, fullName: user.fullName });
+    return res.send({
+      message: 'Get user successfully',
+      statusCode: 200,
+      user: { ...user._doc, fullName: user.fullName }
+    });
   } catch (error) {
-    console.error(error);
-
-    if (error.message.includes('No user found')) {
-      res.status(404);
-    } else {
-      res.status(400);
-    }
-
-    return res.send({ message: error.message });
+    next(error);
   }
 };
 
-export const createUserByAdmin = async (req: Request, res: Response) => {
+export const createUserByAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
     filterRequestBody(signupByAdminKeys, req.body);
     const user = new User(req.body);
-
-    const accessToken = await user.generateAccessToken();
-    const refreshToken = await user.generateRefreshToken();
     await user.save();
 
-    return res.status(201).send({ ...user._doc, accessToken, refreshToken, password: undefined });
+    return res.status(201).send({
+      statusCode: 200,
+      message: 'Create user successfully',
+      user: { ...user._doc, password: undefined }
+    });
   } catch (error) {
-    console.error(error);
-
-    if (error.message.includes('Invalid request body key')) {
-      res.status(422);
-    } else {
-      res.status(400);
-    }
-
-    return res.send({ message: error.message });
+    next(error);
   }
 };
 
-export const updateUserBySuperviser = async (req: Request, res: Response) => {
+export const updateUserBySuperviser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id;
     filterRequestBody(signupByAdminKeys, req.body);
@@ -163,28 +147,16 @@ export const updateUserBySuperviser = async (req: Request, res: Response) => {
     const doc = await User.findOneAndUpdate({ _id: id, role: 'user' }, req.body);
 
     if (!doc) {
-      throw new Error('No user found');
+      throw new NotFoundError('User');
     }
 
-    return res.send({ message: 'Update user successfully' });
+    return res.send({ message: 'Update user successfully', statusCode: 200 });
   } catch (error) {
-    console.error(error);
-
-    if (error.message.includes('Invalid request body key')) {
-      console.error(error);
-
-      res.status(422);
-    } else if (error.message.includes('No user found')) {
-      res.status(404);
-    } else {
-      res.status(400);
-    }
-
-    return res.send({ message: error.message });
+    next(error);
   }
 };
 
-export const updateUserByAdmin = async (req: Request, res: Response) => {
+export const updateUserByAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id;
     filterRequestBody(signupByAdminKeys, req.body);
@@ -195,70 +167,43 @@ export const updateUserByAdmin = async (req: Request, res: Response) => {
 
     await User.findOneAndUpdate({ _id: id, role: { $in: ['user', 'superviser'] } }, req.body);
 
-    return res.send({ message: 'Update user successfully' });
+    return res.send({ message: 'Update user successfully', statusCode: 200 });
   } catch (error) {
-    console.error(error);
-
-    if (error.message.includes('Invalid request body key')) {
-      console.error(error);
-
-      res.status(422);
-    } else {
-      res.status(400);
-    }
-
-    return res.send({ message: error.message });
+    next(error);
   }
 };
 
-export const deleteUserBySuperviser = async (req: Request, res: Response) => {
+export const deleteUserBySuperviser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id;
 
     const doc = await User.findOneAndDelete({ _id: id, role: 'user' });
     if (!doc) {
-      throw new Error('No user found');
+      throw new NotFoundError('User');
     }
 
-    return res.send({ message: 'Delete user successfully' });
+    return res.send({ message: 'Delete user successfully', statusCode: 200 });
   } catch (error) {
-    console.error(error);
-
-    if (error.message.includes('No user found')) {
-      res.status(404);
-    } else {
-      res.status(400);
-    }
-
-    return res.send({ message: error.message });
+    next(error);
   }
 };
 
-export const deleteUserByAdmin = async (req: Request, res: Response) => {
+export const deleteUserByAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id;
 
     const doc = await User.findOneAndDelete({ _id: id, role: { $in: ['user', 'superviser'] } });
     if (!doc) {
-      throw new Error('No user found');
+      throw new NotFoundError('User');
     }
 
-    return res.send({ message: 'Delete user successfully' });
+    return res.send({ message: 'Delete user successfully', statusCode: 200 });
   } catch (error) {
-    console.error(error);
-
-    if (error.message.includes('No user found')) {
-      res.status(404);
-    } else {
-      res.status(400);
-    }
-
-    return res.send({ message: error.message });
+    next(error);
   }
 };
 
-export const getUsers = async (req: Request, res: Response) => {
-  console.log('heheheeh');
+export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const skip = req.query.skip ? parseInt(req.query.skip as string) : 0;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
@@ -271,15 +216,13 @@ export const getUsers = async (req: Request, res: Response) => {
       .sort([[sortBy, order]])
       .select('-refreshToken -password');
 
-    return res.send(users);
+    return res.send({ message: 'Get users successfully', statusCode: 200, users });
   } catch (error) {
-    console.error(error);
-
-    return res.status(400).send({ message: error.message });
+    next(error);
   }
 };
 
-export const addContact = async (req: Request, res: Response) => {
+export const addContact = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.authUser as UserDocument;
     filterRequestBody(addressKeys, req.body);
@@ -293,15 +236,13 @@ export const addContact = async (req: Request, res: Response) => {
     user.contactDetails?.push(contactDetail);
     await user.save();
 
-    return res.send({ message: 'Add contact successfully' });
+    return res.status(201).send({ message: 'Add contact successfully', statusCode: 201 });
   } catch (error) {
-    console.error(error);
-
-    return res.status(400).send({ message: error.message });
+    next(error);
   }
 };
 
-export const updateContact = async (req: Request, res: Response) => {
+export const updateContact = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id;
     const user = req.authUser as UserDocument;
@@ -314,7 +255,7 @@ export const updateContact = async (req: Request, res: Response) => {
     }
 
     if (req.body.phone && !validator.isMobilePhone(req.body.phone.toString(), ['vi-VN'])) {
-      throw new Error('Phone is not valid');
+      throw new InvalidBodyError('phone');
     }
 
     const doc = await User.findOneAndUpdate({ _id: user._id, 'contactDetails._id': id }, updateArgs, { new: true });
@@ -323,35 +264,26 @@ export const updateContact = async (req: Request, res: Response) => {
       throw new Error('Update contact failed');
     }
 
-    return res.send({ message: 'Contact updated' });
+    return res.send({ message: 'Contact updated', statusCode: 200 });
   } catch (error) {
-    console.error(error);
-
-    return res.status(400).send({ message: error.message });
+    next(error);
   }
 };
 
-export const deleteContact = async (req: Request, res: Response) => {
+export const deleteContact = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id;
     const user = req.authUser as UserDocument;
 
-    await User.findByIdAndUpdate({ _id: user._id }, { $pull: { contactDetails: { _id: id } } });
-    return res.send({ message: 'Contact deleted' });
+    await User.findOneAndUpdate({ _id: user._id }, { $pull: { contactDetails: { _id: id } } });
+
+    return res.send({ message: 'Contact deleted', statusCode: 200 });
   } catch (error) {
-    console.error(error);
-
-    if (error.message.includes('Contact not found')) {
-      res.status(404);
-    } else {
-      res.status(400);
-    }
-
-    return res.send({ message: error.message });
+    next(error);
   }
 };
 
-export const getAccessToken = async (req: Request, res: Response) => {
+export const getAccessToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { token } = filterRequestBody(['token'], req.body);
 
@@ -365,21 +297,17 @@ export const getAccessToken = async (req: Request, res: Response) => {
       refreshToken
     });
   } catch (error) {
-    console.error(error);
-
-    return res.status(400).send({ message: error.message });
+    next(error);
   }
 };
 
-export const logoutUser = async (req: Request, res: Response) => {
+export const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.authUser as UserDocument;
 
     await User.updateOne({ _id: user._id }, { $unset: { refreshToken: 1 } });
     return res.send({ message: 'Logout successfully' });
   } catch (error) {
-    console.error(error);
-
-    return res.status(400).send({ message: error.message });
+    next(error);
   }
 };
