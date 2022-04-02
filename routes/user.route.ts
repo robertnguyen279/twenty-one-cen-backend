@@ -15,7 +15,8 @@ import {
   getAccessToken,
   logoutUser,
   updateUserByAdmin,
-  deleteUserByAdmin
+  deleteUserByAdmin,
+  loginByThirdParty
 } from 'controllers/user.controller';
 import authMiddleware from 'middlewares/auth.middleware';
 import superviserMiddleware from 'middlewares/superviser.middleware';
@@ -26,6 +27,7 @@ router.post('/', createUser);
 router.post('/createByAdmin', authMiddleware, superviserMiddleware, adminMiddleware, createUserByAdmin);
 router.post('/contact', authMiddleware, addContact);
 router.post('/token', getAccessToken);
+router.post('/loginByThirdParty', loginByThirdParty);
 router.patch('/contact/:id', authMiddleware, updateContact);
 router.delete('/contact/:id', authMiddleware, deleteContact);
 router.delete('/logout', authMiddleware, logoutUser);

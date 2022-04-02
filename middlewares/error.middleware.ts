@@ -7,7 +7,7 @@ export const errorLogger = (error: ErrorType, req: Request, res: Response, next:
   next(); // calling next middleware
 };
 
-export const errorResponder = (req: Request, res: Response, next: NextFunction) => {
+export const errorResponder = (req: Request, res: Response) => {
   res.header('Content-Type', 'application/json');
   const error = req.error;
 
@@ -16,8 +16,6 @@ export const errorResponder = (req: Request, res: Response, next: NextFunction) 
   } else if (error) {
     res.status(400).send({ name: error.name, message: error.message, statusCode: 400 });
   }
-
-  next();
 };
 
 export const invalidPathHandler = (req: Request, res: Response) => {

@@ -21,6 +21,14 @@ export class InvalidBodyError extends ExpressError {
   }
 }
 
+export class InvalidQueryError extends InvalidBodyError {
+  constructor(key) {
+    super(key);
+
+    this.message = `Invalid request query "${key}"`;
+  }
+}
+
 export class NotFoundError extends ExpressError {
   constructor(key) {
     super();

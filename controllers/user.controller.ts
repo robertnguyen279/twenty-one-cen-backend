@@ -4,9 +4,11 @@ import { filterRequestBody } from 'services/common.service';
 import { UserDocument } from 'types/user.type';
 import { Types } from 'mongoose';
 import validator from 'validator';
-import { NotFoundError, ForbiddenError, InvalidBodyError } from 'services/error.service';
+import { NotFoundError, ForbiddenError, InvalidBodyError, InvalidQueryError } from 'services/error.service';
+import axios from 'axios';
 
 const signupKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday'];
+const signupByThirdPartyKeys = ['firstName', 'lastName', 'email', 'avatarUrl', 'thirdPartyToken'];
 const signupByAdminKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday', 'role'];
 const loginKeys = ['emailOrPhone', 'password'];
 const addressKeys = ['province', 'district', 'addressDetail', 'phone'];
@@ -14,6 +16,11 @@ const addressKeys = ['province', 'district', 'addressDetail', 'phone'];
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     filterRequestBody(signupKeys, req.body);
+
+    if (!req.body.password) {
+      throw new InvalidBodyError('password');
+    }
+
     const user = new User(req.body);
 
     const accessToken = await user.generateAccessToken();
@@ -293,6 +300,8 @@ export const getAccessToken = async (req: Request, res: Response, next: NextFunc
     await user.save();
 
     return res.send({
+      message: 'Get new access token successfully',
+      statusCode: 200,
       accessToken,
       refreshToken
     });
@@ -306,7 +315,55 @@ export const logoutUser = async (req: Request, res: Response, next: NextFunction
     const user = req.authUser as UserDocument;
 
     await User.updateOne({ _id: user._id }, { $unset: { refreshToken: 1 } });
-    return res.send({ message: 'Logout successfully' });
+    return res.send({ message: 'Logout successfully', statusCode: 200 });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getGoogleUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = req.authUser as UserDocument;
+    console.log(req.user);
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
+    await user.save();
+
+    res.send({ statusCode: 200, message: 'Get Google user successfully', user, accessToken, refreshToken });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const loginByThirdParty = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const type = req.query.type;
+    const { firstName, lastName, email, avatarUrl, thirdPartyToken } = filterRequestBody(
+      signupByThirdPartyKeys,
+      req.body
+    );
+
+    if (type === 'google') {
+      await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${thirdPartyToken}`);
+    } else if (type === 'facebook') {
+      await axios.get(`https://graph.facebook.com/me?access_token=${thirdPartyToken}`);
+    } else {
+      throw new InvalidQueryError('type');
+    }
+
+    let user: UserDocument | null;
+
+    user = await User.findOne({ email });
+
+    if (!user) {
+      user = new User({ firstName, lastName, email, avatarUrl });
+    }
+
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
+    await user.save();
+
+    res.send({ statusCode: 200, message: `Login by ${type} successfully`, user, accessToken, refreshToken });
   } catch (error) {
     next(error);
   }

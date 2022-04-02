@@ -42,8 +42,6 @@ const userSchema = new Schema(
     },
     phone: {
       type: Number,
-      required: true,
-      unique: true,
       validate: {
         validator: (phone: number) => {
           return validator.isMobilePhone(phone.toString(), ['vi-VN']);
@@ -53,7 +51,6 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: true,
       min: 6,
       max: 20,
       validate: {
@@ -71,7 +68,13 @@ const userSchema = new Schema(
       }
     },
     avatarUrl: {
-      type: String
+      type: String,
+      validate: {
+        validator: (url: string) => {
+          return validator.isURL(url);
+        },
+        message: 'Invalid url.'
+      }
     },
     role: {
       type: String,
