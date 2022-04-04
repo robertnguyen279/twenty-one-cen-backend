@@ -13,7 +13,7 @@ import superviserMiddleware from 'middlewares/superviser.middleware';
 const router = express.Router();
 
 router.post('/', authMiddleware, superviserMiddleware, createProduct);
-router.get('/', authMiddleware, superviserMiddleware, getAllProducts);
+router.get('/', getAllProducts);
 router.get('/find', getProducts);
 router.get('/:id', getProductById);
 router.patch('/:id', authMiddleware, superviserMiddleware, updateProduct);

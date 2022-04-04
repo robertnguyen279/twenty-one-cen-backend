@@ -107,7 +107,7 @@ export const getAllProducts = async (req: Request, res: Response, next: NextFunc
   try {
     const products = await Product.find().populate({ path: 'category', select: 'name' }).select('-noToneName');
 
-    res.send({ statusCode: 200, message: 'Get all products successfully', products });
+    res.send({ statusCode: 200, message: 'Get all products successfully', count: products.length, products });
   } catch (error) {
     next(error);
   }
@@ -143,7 +143,7 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       .sort([[sortBy, order]])
       .select('-noToneName');
 
-    res.send({ statusCode: 200, message: 'Get products successfully', products });
+    res.send({ statusCode: 200, message: 'Get products successfully', count: products.length, products });
   } catch (error) {
     next(error);
   }
