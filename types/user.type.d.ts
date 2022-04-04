@@ -25,6 +25,8 @@ export interface User {
   birthday?: Date;
   refreshToken: string;
   contactDetails?: Array<ContactDetail>;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface UserDocument extends User, Document {

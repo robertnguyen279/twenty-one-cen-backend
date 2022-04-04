@@ -91,10 +91,6 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     const user = req.authUser as UserDocument;
     filterRequestBody(signupKeys, req.body);
 
-    if (req.body.phone && !validator.isMobilePhone(req.body.phone.toString(), ['vi-VN'])) {
-      throw new InvalidBodyError('phone');
-    }
-
     for (const key in req.body) {
       user[key] = req.body[key];
     }
