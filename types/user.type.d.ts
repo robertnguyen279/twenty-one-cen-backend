@@ -1,4 +1,5 @@
 import { Document, Model } from 'mongoose';
+import { ObjectId } from 'mongodb';
 
 export enum Role {
   user = 'user',
@@ -6,7 +7,8 @@ export enum Role {
   admin = 'admin'
 }
 
-export type ContactDetails = {
+export type ContactDetail = {
+  _id: ObjectId;
   province: string;
   district: string;
   addressDetail: string;
@@ -16,12 +18,13 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  password: string;
+  password?: string;
   avatarUrl?: string;
   role: Role;
-  phone?: number;
+  phone: number;
   birthday?: Date;
-  contactDetails?: Array<ContactDetails>;
+  refreshToken: string;
+  contactDetails?: Array<ContactDetail>;
 }
 
 export interface UserDocument extends User, Document {
@@ -34,5 +37,6 @@ export interface UserDocument extends User, Document {
 
 export interface UserModel extends Model<UserDocument> {
   verifyAccessToken(token): Promise<UserDocument>;
+  verifyRefreshToken(token): Promise<UserDocument>;
   generateHashPassword(password: string): Promise<string>;
 }

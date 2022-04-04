@@ -6,22 +6,39 @@ import {
   updateUser,
   getUserById,
   createUserByAdmin,
+  updateUserBySuperviser,
+  deleteUserBySuperviser,
+  getUsers,
+  addContact,
+  updateContact,
+  deleteContact,
+  getAccessToken,
+  logoutUser,
   updateUserByAdmin,
   deleteUserByAdmin,
-  getUsers
+  loginByThirdParty
 } from 'controllers/user.controller';
 import authMiddleware from 'middlewares/auth.middleware';
+import superviserMiddleware from 'middlewares/superviser.middleware';
 import adminMiddleware from 'middlewares/admin.middleware';
 const router = express.Router();
 
 router.post('/', createUser);
-router.post('/admin', authMiddleware, adminMiddleware, createUserByAdmin);
+router.post('/createByAdmin', authMiddleware, superviserMiddleware, adminMiddleware, createUserByAdmin);
+router.post('/contact', authMiddleware, addContact);
+router.post('/token', getAccessToken);
+router.post('/loginByThirdParty', loginByThirdParty);
+router.patch('/contact/:id', authMiddleware, updateContact);
+router.delete('/contact/:id', authMiddleware, deleteContact);
+router.delete('/logout', authMiddleware, logoutUser);
 router.patch('/', authMiddleware, updateUser);
 router.post('/login', loginUser);
+router.get('/findUsers', authMiddleware, superviserMiddleware, getUsers);
 router.get('/', authMiddleware, getUser);
-router.get('/admin', authMiddleware, adminMiddleware, getUsers);
-router.get('/:id', authMiddleware, adminMiddleware, getUserById);
-router.patch('/:id', authMiddleware, adminMiddleware, updateUserByAdmin);
-router.delete('/:id', authMiddleware, adminMiddleware, deleteUserByAdmin);
+router.get('/:id', authMiddleware, superviserMiddleware, getUserById);
+router.patch('/admin/:id', authMiddleware, superviserMiddleware, adminMiddleware, updateUserByAdmin);
+router.delete('/admin/:id', authMiddleware, superviserMiddleware, adminMiddleware, deleteUserByAdmin);
+router.delete('/:id', authMiddleware, superviserMiddleware, deleteUserBySuperviser);
+router.patch('/:id', authMiddleware, superviserMiddleware, updateUserBySuperviser);
 
 export default router;

@@ -1,5 +1,6 @@
-import { Schema, model, models } from 'mongoose';
+import { Schema, model, models, Types } from 'mongoose';
 import { UserDocument, UserModel } from 'types/user.type';
+import { NotFoundError, UnauthorizedError } from 'services/error.service';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import validator from 'validator';
@@ -32,7 +33,6 @@ const userSchema = new Schema(
       type: String,
       trim: true,
       unique: true,
-      required: true,
       validate: {
         validator: (email: string) => {
           return validator.isEmail(email);
@@ -40,9 +40,17 @@ const userSchema = new Schema(
         message: 'Email is invalid'
       }
     },
+    phone: {
+      type: Number,
+      validate: {
+        validator: (phone: number) => {
+          return validator.isMobilePhone(phone.toString(), ['vi-VN']);
+        },
+        message: 'Phone is invalid'
+      }
+    },
     password: {
       type: String,
-      required: true,
       min: 6,
       max: 20,
       validate: {
@@ -60,7 +68,13 @@ const userSchema = new Schema(
       }
     },
     avatarUrl: {
-      type: String
+      type: String,
+      validate: {
+        validator: (url: string) => {
+          return validator.isURL(url);
+        },
+        message: 'Invalid url.'
+      }
     },
     role: {
       type: String,
@@ -68,11 +82,12 @@ const userSchema = new Schema(
       required: true,
       default: 'user'
     },
-    phone: {
-      type: Number
-    },
     contactDetails: [
       {
+        _id: {
+          type: Types.ObjectId,
+          required: true
+        },
         province: {
           type: String,
           required: true,
@@ -87,6 +102,15 @@ const userSchema = new Schema(
           type: String,
           required: true,
           trim: true
+        },
+        phone: {
+          type: Number,
+          validate: {
+            validator: (phone: number) => {
+              return validator.isMobilePhone(phone.toString(), ['vi-VN']);
+            },
+            message: 'Phone is invalid'
+          }
         }
       }
     ],
@@ -131,15 +155,35 @@ userSchema.methods.comparePassword = function (password: string): boolean {
 };
 
 userSchema.statics.verifyAccessToken = async function (token: string): Promise<UserDocument> {
-  const { userId } = await (<jwt.UserIDJwtPayload>jwt.verify(token, process.env.JWT_ACCESS_SECRET as string));
+  try {
+    const { userId } = await (<jwt.UserIDJwtPayload>jwt.verify(token, process.env.JWT_ACCESS_SECRET as string));
 
-  const user = await User.findById(userId).select('-refreshToken -password');
+    const user = await User.findById(userId).select('-refreshToken -password');
 
-  if (!user) {
-    throw new Error('User not found');
+    if (!user) {
+      throw new NotFoundError('User');
+    }
+
+    return user;
+  } catch (error) {
+    throw new UnauthorizedError();
   }
+};
 
-  return user;
+userSchema.statics.verifyRefreshToken = async function (token: string): Promise<UserDocument> {
+  try {
+    const { userId } = await (<jwt.UserIDJwtPayload>jwt.verify(token, process.env.JWT_REFRESH_SECRET as string));
+
+    const user = await User.findOne({ _id: userId, refreshToken: token }).select('-refreshToken -password');
+
+    if (!user) {
+      throw new NotFoundError('User');
+    }
+
+    return user;
+  } catch (error) {
+    throw new UnauthorizedError();
+  }
 };
 
 userSchema.statics.generateHashPassword = async function (password: string): Promise<string> {

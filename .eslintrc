@@ -8,8 +8,9 @@
   "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
   "ignorePatterns": ["webpack.config.js"],
   "rules": {
-    "@typescript-eslint/no-unused-vars": "error"
+    "@typescript-eslint/no-unused-vars": "error",
     // to enforce using type for object type definitions, can be type or interface
+    "@typescript-eslint/no-explicit-any": 0
   },
   "env": {
     "browser": true,
