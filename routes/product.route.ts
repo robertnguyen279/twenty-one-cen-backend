@@ -4,7 +4,8 @@ import {
   getProductById,
   updateProduct,
   getAllProducts,
-  deleteProduct
+  deleteProduct,
+  getProducts
 } from 'controllers/product.controller';
 
 import authMiddleware from 'middlewares/auth.middleware';
@@ -13,7 +14,8 @@ const router = express.Router();
 
 router.post('/', authMiddleware, superviserMiddleware, createProduct);
 router.get('/', authMiddleware, superviserMiddleware, getAllProducts);
-router.get('/:id', authMiddleware, superviserMiddleware, getProductById);
+router.get('/find', getProducts);
+router.get('/:id', getProductById);
 router.patch('/:id', authMiddleware, superviserMiddleware, updateProduct);
 router.delete('/:id', authMiddleware, superviserMiddleware, deleteProduct);
 

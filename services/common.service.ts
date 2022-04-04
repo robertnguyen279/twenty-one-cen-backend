@@ -55,7 +55,9 @@ export const removeVietnameseTones = (str: string): string => {
   /*eslint-disable */
   str = str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g, ' ');
   /*eslint-enable */
-  return str;
+  return str.toLowerCase();
 };
 
 export const transformNameToUrl = (str: string): string => `${str.toLowerCase().split(' ').join('-')}-${Date.now()}`;
+
+export const parseQueryText = (text: string): string => text.split('-').join(' ').toLowerCase();

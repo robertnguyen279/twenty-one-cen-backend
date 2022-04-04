@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import Product from 'models/product.model';
 import Category from 'models/category.model';
-import { filterRequestBody } from 'services/common.service';
+import { filterRequestBody, parseQueryText } from 'services/common.service';
 import { CategoryDocument } from 'types/category.type';
 import mongoose from 'mongoose';
 import { ProductDocument } from 'types/product.type';
@@ -87,7 +87,7 @@ export const getProductById = async (req: Request, res: Response, next: NextFunc
   try {
     const id = req.params.id;
 
-    const product = await Product.findById(id).populate({ path: 'category', select: 'name' });
+    const product = await Product.findById(id).populate({ path: 'category', select: 'name' }).select('-noToneName');
 
     if (!product) {
       throw new NotFoundError('Product');
@@ -105,7 +105,7 @@ export const getProductById = async (req: Request, res: Response, next: NextFunc
 
 export const getAllProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const products = await Product.find().populate({ path: 'category', select: 'name' });
+    const products = await Product.find().populate({ path: 'category', select: 'name' }).select('-noToneName');
 
     res.send({ statusCode: 200, message: 'Get all products successfully', products });
   } catch (error) {
@@ -124,6 +124,26 @@ export const deleteProduct = async (req: Request, res: Response, next: NextFunct
     }
 
     res.send({ statusCode: 200, message: 'Product deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const text = req.query.text ? req.query.text : '';
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+    const skip = req.query.skip ? parseInt(req.query.skip as string) : 0;
+    const sortBy = req.query.sortBy ? req.query.sortBy : 'createdAt';
+    const order = req.query.order ? req.query.order : 'desc';
+    const products = await Product.find({ noToneName: { $regex: parseQueryText(text as string) } })
+      .limit(limit)
+      .skip(skip)
+      .populate({ path: 'category', select: 'name' })
+      .sort([[sortBy, order]])
+      .select('-noToneName');
+
+    res.send({ statusCode: 200, message: 'Get products successfully', products });
   } catch (error) {
     next(error);
   }
