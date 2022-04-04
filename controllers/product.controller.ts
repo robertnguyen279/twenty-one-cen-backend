@@ -4,7 +4,7 @@ import Category from 'models/category.model';
 import { filterRequestBody, parseQueryText } from 'services/common.service';
 import { CategoryDocument } from 'types/category.type';
 import mongoose from 'mongoose';
-import { ProductDocument } from 'types/product.type';
+import { ProductDocument, FindProductArgs } from 'types/product.type';
 import { NotFoundError } from 'services/error.service';
 
 const createProductKeys = ['name', 'description', 'pictures*', 'price', 'available*', 'category*'];
@@ -136,7 +136,17 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     const skip = req.query.skip ? parseInt(req.query.skip as string) : 0;
     const sortBy = req.query.sortBy ? req.query.sortBy : 'createdAt';
     const order = req.query.order ? req.query.order : 'desc';
-    const products = await Product.find({ noToneName: { $regex: parseQueryText(text as string) } })
+    const category = req.query.category ? req.query.category : null;
+
+    const findProductArgs: FindProductArgs = {};
+
+    findProductArgs.noToneName = { $regex: parseQueryText(text as string) };
+
+    if (category) {
+      findProductArgs.category = category as string;
+    }
+
+    const products = await Product.find(findProductArgs)
       .limit(limit)
       .skip(skip)
       .populate({ path: 'category', select: 'name' })
@@ -147,4 +157,32 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
   } catch (error) {
     next(error);
   }
+};
+
+export const getAllCategories = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const categories = await Category.find();
+
+    res.send({ statusCode: 200, message: 'Get all categories successfully', categories });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteCategory = async (req: Request, res: Response, next: NextFunction) => {
+  const session = await mongoose.startSession();
+
+  await session.withTransaction(async () => {
+    try {
+      const id = req.params.id;
+
+      await Product.deleteMany({ category: id }, { session });
+      await Category.findOneAndDelete({ _id: id }, { session });
+    } catch (error) {
+      next(error);
+    }
+  });
+  session.endSession();
+
+  res.status(200).send({ statusCode: 200, message: 'Delete category successfully' });
 };

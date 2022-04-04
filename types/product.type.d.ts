@@ -39,3 +39,10 @@ export interface ProductDocument extends Product, Document {
 }
 
 export type ProductModel = Model<ProductDocument>;
+
+export type FindProductArgs = {
+  noToneName?: {
+    $regex: string;
+  };
+  category?: string;
+};
