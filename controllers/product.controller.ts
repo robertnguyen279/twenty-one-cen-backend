@@ -2,44 +2,128 @@ import { Request, Response, NextFunction } from 'express';
 import Product from 'models/product.model';
 import Category from 'models/category.model';
 import { filterRequestBody } from 'services/common.service';
-import { MissingRequestBodyError } from 'services/error.service';
 import { CategoryDocument } from 'types/category.type';
 import mongoose from 'mongoose';
+import { ProductDocument } from 'types/product.type';
+import { NotFoundError } from 'services/error.service';
 
-const createProductKeys = ['name', 'description', 'pictures', 'price', 'available', 'category'];
+const createProductKeys = ['name', 'description', 'pictures*', 'price', 'available*', 'category*'];
+const updateProductKeys = ['name', 'description', 'pictures', 'price', 'available', 'category'];
 
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { name, description, pictures, price, available, category } = filterRequestBody(createProductKeys, req.body);
-    let categoryDoc: CategoryDocument | null;
+  const session = await mongoose.startSession();
 
-    if (!category || !pictures || !available) {
-      throw new MissingRequestBodyError('category | pictires | available');
+  await session.withTransaction(async () => {
+    try {
+      const { name, description, pictures, price, available, category } = filterRequestBody(
+        createProductKeys,
+        req.body
+      );
+
+      let categoryDoc: CategoryDocument | null;
+
+      categoryDoc = await Category.findOne({ name: category });
+      if (!categoryDoc) {
+        categoryDoc = new Category({ name: category });
+        await categoryDoc.save({ session });
+      }
+
+      const product = new Product({ name, description, pictures, price, available, category: categoryDoc._id });
+
+      await product.save({ session });
+    } catch (error) {
+      next(error);
+    }
+  });
+  session.endSession();
+
+  res.status(201).send({
+    statusCode: 201,
+    message: 'Create product successfully'
+  });
+};
+
+export const updateProduct = async (req: Request, res: Response, next: NextFunction) => {
+  const session = await mongoose.startSession();
+  await session.withTransaction(async () => {
+    try {
+      const id = req.params.id;
+      filterRequestBody(updateProductKeys, req.body);
+
+      const product = (await Product.findById(id)) as ProductDocument;
+
+      if (req.body.category) {
+        let category: CategoryDocument | null;
+        category = await Category.findOne({ name: req.body.category });
+        if (!category) {
+          category = new Category({ name: req.body.category });
+          await category.save({ session });
+        }
+        console.log(category);
+
+        product.category = category._id;
+      }
+
+      for (const key in req.body) {
+        if (key !== 'category') {
+          product[key] = req.body[key];
+        }
+      }
+
+      await product.save({ session });
+    } catch (error) {
+      next(error);
+    }
+  });
+  session.endSession();
+
+  res.status(201).send({
+    statusCode: 201,
+    message: 'Update product successfully'
+  });
+};
+
+export const getProductById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = req.params.id;
+
+    const product = await Product.findById(id).populate({ path: 'category', select: 'name' });
+
+    if (!product) {
+      throw new NotFoundError('Product');
     }
 
-    const session = await mongoose.startSession();
-
-    session.withTransaction(async () => {
-      try {
-        categoryDoc = await Category.findOne({ name: category });
-        if (!categoryDoc) {
-          categoryDoc = new Category({ name: category });
-          await categoryDoc.save({ session });
-        }
-
-        const product = new Product({ name, description, pictures, price, available, category: categoryDoc._id });
-
-        await product.save({ session });
-
-        res.status(201).send({
-          statusCode: 201,
-          message: 'Create product successfully',
-          product: { ...product._doc, totalQuantity: product.totalQuantity }
-        });
-      } catch (error) {
-        next(error);
-      }
+    res.send({
+      statusCode: 200,
+      message: 'Get product by id successfully',
+      product: { ...product._doc, totalQuantity: product.totalQuantity }
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllProducts = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const products = await Product.find().populate({ path: 'category', select: 'name' });
+
+    res.send({ statusCode: 200, message: 'Get all products successfully', products });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = req.params.id;
+
+    const doc = await Product.findByIdAndDelete(id);
+
+    if (!doc) {
+      throw new NotFoundError('Product');
+    }
+
+    res.send({ statusCode: 200, message: 'Product deleted successfully' });
   } catch (error) {
     next(error);
   }

@@ -7,7 +7,7 @@ import validator from 'validator';
 import { NotFoundError, ForbiddenError, InvalidBodyError, InvalidQueryError } from 'services/error.service';
 import axios from 'axios';
 
-const signupKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday'];
+const signupKeys = ['firstName', 'lastName', 'email', 'password*', 'phone', 'avatarUrl', 'birthday'];
 const signupByThirdPartyKeys = ['firstName', 'lastName', 'email', 'avatarUrl', 'thirdPartyToken'];
 const signupByAdminKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday', 'role'];
 const loginKeys = ['emailOrPhone', 'password'];
@@ -16,10 +16,6 @@ const addressKeys = ['province', 'district', 'addressDetail', 'phone'];
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     filterRequestBody(signupKeys, req.body);
-
-    if (!req.body.password) {
-      throw new InvalidBodyError('password');
-    }
 
     const user = new User(req.body);
 

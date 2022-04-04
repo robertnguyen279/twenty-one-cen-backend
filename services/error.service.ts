@@ -61,6 +61,6 @@ export class MissingRequestBodyError extends ExpressError {
     super();
 
     this.message = `Missing requst body key "${key}"`;
-    this.statusCode = 401;
+    this.statusCode = 422;
   }
 }
