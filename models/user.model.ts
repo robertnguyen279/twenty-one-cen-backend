@@ -190,7 +190,7 @@ userSchema.statics.generateHashPassword = async function (password: string): Pro
   return bcrypt.hash(password, 8);
 };
 
-userSchema.virtual('fullName').get(function () {
+userSchema.virtual('fullName').get(function (): string {
   return `${this.firstName} ${this.lastName}`;
 });
 

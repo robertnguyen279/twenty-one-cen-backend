@@ -55,3 +55,12 @@ export class UnauthorizedError extends ExpressError {
     this.statusCode = 401;
   }
 }
+
+export class MissingRequestBodyError extends ExpressError {
+  constructor(key) {
+    super();
+
+    this.message = `Missing requst body key "${key}"`;
+    this.statusCode = 422;
+  }
+}
