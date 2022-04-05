@@ -22,7 +22,8 @@ const productSchema = new Schema(
     discount: {
       type: Number,
       min: 0,
-      max: 100
+      max: 100,
+      default: 0
     },
     urlString: {
       type: String,
@@ -81,6 +82,10 @@ productSchema.pre('validate', function (next): void {
 
 productSchema.virtual('totalQuantity').get(function (): string {
   return this.available.reduce((sum, current) => sum + current.quantity, 0);
+});
+
+productSchema.virtual('actualPrice').get(function (): number {
+  return this.price - (this.price * this.discount) / 100;
 });
 
 const Product = (models.Product as ProductModel) || model<ProductDocument, ProductModel>('Product', productSchema);

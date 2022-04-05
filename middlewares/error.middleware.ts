@@ -17,11 +17,3 @@ export const errorResponder = (req: Request, res: Response) => {
     res.status(400).send({ name: error.name, message: error.message, statusCode: 400 });
   }
 };
-
-export const invalidPathHandler = (req: Request, res: Response) => {
-  res.status(404).send({
-    name: 'NotFoundError',
-    message: 'The path you are trying to reach does not exist',
-    statusCode: 404
-  });
-};

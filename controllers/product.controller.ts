@@ -8,7 +8,7 @@ import { ProductDocument, FindProductArgs } from 'types/product.type';
 import { NotFoundError } from 'services/error.service';
 
 const createProductKeys = ['name', 'description', 'pictures*', 'price', 'available*', 'category*'];
-const updateProductKeys = ['name', 'description', 'pictures', 'price', 'available', 'category'];
+const updateProductKeys = ['name', 'description', 'pictures', 'price', 'available', 'category', 'discount'];
 
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
   const session = await mongoose.startSession();
@@ -179,7 +179,11 @@ export const getByUrlString = async (req: Request, res: Response, next: NextFunc
       throw new NotFoundError('Product');
     }
 
-    res.send({ statusCode: 200, message: 'Get product successfully', product });
+    res.send({
+      statusCode: 200,
+      message: 'Get product successfully',
+      product: { ...product._doc, actualPrice: product.actualPrice }
+    });
   } catch (error) {
     next(error);
   }
