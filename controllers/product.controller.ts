@@ -188,3 +188,22 @@ export const getByUrlString = async (req: Request, res: Response, next: NextFunc
     next(error);
   }
 };
+
+export const countAvailable = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = req.params.id;
+
+    const product = await Product.findById(id);
+
+    const size = req.query.size ? (req.query.size as string) : '';
+    const color = req.query.color ? (req.query.color as string) : '';
+
+    const filterAvailable = product?.available.filter((item) => item.size.includes(size) && item.color.includes(color));
+
+    const countAvailable = filterAvailable?.reduce((sum, current) => sum + current.quantity, 0);
+
+    res.send({ statusCode: 200, message: 'Get count product successfully', count: countAvailable });
+  } catch (error) {
+    next(error);
+  }
+};

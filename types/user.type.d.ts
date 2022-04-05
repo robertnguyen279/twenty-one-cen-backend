@@ -7,11 +7,14 @@ export enum Role {
   admin = 'admin'
 }
 
-export type ContactDetail = {
+export type UserContactDetail = {
   _id: ObjectId;
   province: string;
   district: string;
   addressDetail: string;
+  phone: number;
+  firstName: string;
+  lastName: string;
 };
 
 export interface User {
@@ -24,7 +27,7 @@ export interface User {
   phone: number;
   birthday?: Date;
   refreshToken: string;
-  contactDetails?: Array<ContactDetail>;
+  contactDetails?: Array<UserContactDetail>;
   createdAt?: Date;
   updatedAt?: Date;
 }

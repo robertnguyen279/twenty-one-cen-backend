@@ -21,6 +21,15 @@ export class InvalidBodyError extends ExpressError {
   }
 }
 
+export class UnavailableError extends ExpressError {
+  constructor(key) {
+    super();
+
+    this.message = `${key} not available`;
+    this.statusCode = 422;
+  }
+}
+
 export class InvalidQueryError extends InvalidBodyError {
   constructor(key) {
     super(key);

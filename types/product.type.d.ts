@@ -9,13 +9,28 @@ export enum Size {
   XL = 'XL'
 }
 
+export enum Color {
+  blue = 'blue',
+  red = 'red',
+  green = 'green',
+  purple = 'purple',
+  black = 'black',
+  pink = 'pink',
+  yellow = 'yellow',
+  orange = 'orange',
+  white = 'white',
+  brown = 'brown'
+}
+
 export type Picure = {
   pictureUrl: string;
   description: string;
 };
 
-export type SizeQuantity = {
+export type SizeColorQuantity = {
+  _id: ObjectId;
   size: Size;
+  color: Color;
   quantity: number;
 };
 
@@ -28,7 +43,7 @@ export interface Product {
   price: number;
   sold: number;
   category: ObjectId;
-  available: Array<SizeQuantity>;
+  available: Array<SizeColorQuantity>;
 }
 
 export interface ProductDocument extends Product, Document {

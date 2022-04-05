@@ -7,7 +7,8 @@ import {
   getProducts,
   getAllCategories,
   deleteCategory,
-  getByUrlString
+  getByUrlString,
+  countAvailable
 } from 'controllers/product.controller';
 
 import authMiddleware from 'middlewares/auth.middleware';
@@ -19,6 +20,7 @@ router.get('/', getAllProducts);
 router.get('/category', getAllCategories);
 router.delete('/category/:id', authMiddleware, superviserMiddleware, deleteCategory);
 router.get('/find', getProducts);
+router.get('/count/:id', countAvailable);
 router.get('/:urlString', getByUrlString);
 router.patch('/:id', authMiddleware, superviserMiddleware, updateProduct);
 router.delete('/:id', authMiddleware, superviserMiddleware, deleteProduct);
