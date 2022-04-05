@@ -19,6 +19,11 @@ const productSchema = new Schema(
       required: true,
       trim: true
     },
+    discount: {
+      type: Number,
+      min: 0,
+      max: 100
+    },
     urlString: {
       type: String,
       required: true,

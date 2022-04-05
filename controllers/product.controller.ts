@@ -83,26 +83,6 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
   });
 };
 
-export const getProductById = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const id = req.params.id;
-
-    const product = await Product.findById(id).populate({ path: 'category', select: 'name' }).select('-noToneName');
-
-    if (!product) {
-      throw new NotFoundError('Product');
-    }
-
-    res.send({
-      statusCode: 200,
-      message: 'Get product by id successfully',
-      product: { ...product._doc, totalQuantity: product.totalQuantity }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const getAllProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const products = await Product.find().populate({ path: 'category', select: 'name' }).select('-noToneName');
@@ -185,4 +165,22 @@ export const deleteCategory = async (req: Request, res: Response, next: NextFunc
   session.endSession();
 
   res.status(200).send({ statusCode: 200, message: 'Delete category successfully' });
+};
+
+export const getByUrlString = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const urlString = req.params.urlString;
+
+    const product = await Product.findOne({ urlString })
+      .populate({ path: 'category', select: 'name' })
+      .select('-noToneName');
+
+    if (!product) {
+      throw new NotFoundError('Product');
+    }
+
+    res.send({ statusCode: 200, message: 'Get product successfully', product });
+  } catch (error) {
+    next(error);
+  }
 };
