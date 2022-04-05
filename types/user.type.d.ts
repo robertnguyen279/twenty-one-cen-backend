@@ -34,7 +34,7 @@ export interface UserDocument extends User, Document {
   generateRefreshToken(): Promise<string>;
   fullName: string;
   comparePassword(password: string): string;
-  _doc: User;
+  _doc: UserDocument;
 }
 
 export interface UserModel extends Model<UserDocument> {

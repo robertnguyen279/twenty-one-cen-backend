@@ -29,13 +29,19 @@ export interface Product {
   sold: number;
   category: ObjectId;
   available: Array<SizeQuantity>;
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 export interface ProductDocument extends Product, Document {
   totalQuantity: number;
-  _doc: Product;
+  actualPrice: number;
+  _doc: ProductDocument;
 }
 
 export type ProductModel = Model<ProductDocument>;
+
+export type FindProductArgs = {
+  noToneName?: {
+    $regex: string;
+  };
+  category?: string;
+};
