@@ -12,6 +12,7 @@ const updateProductKeys = ['name', 'description', 'pictures', 'price', 'availabl
 
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
   const session = await mongoose.startSession();
+  const productId = new mongoose.Types.ObjectId();
 
   await session.withTransaction(async () => {
     try {
@@ -28,18 +29,28 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         await categoryDoc.save({ session });
       }
 
-      const product = new Product({ name, description, pictures, price, available, category: categoryDoc._id });
+      const product = new Product({
+        _id: productId,
+        name,
+        description,
+        pictures,
+        price,
+        available,
+        category: categoryDoc._id
+      });
 
       await product.save({ session });
     } catch (error) {
       next(error);
     }
   });
+
   session.endSession();
 
   res.status(201).send({
     statusCode: 201,
-    message: 'Create product successfully'
+    message: 'Create product successfully',
+    productId
   });
 };
 
@@ -59,7 +70,6 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
           category = new Category({ name: req.body.category });
           await category.save({ session });
         }
-        console.log(category);
 
         product.category = category._id;
       }

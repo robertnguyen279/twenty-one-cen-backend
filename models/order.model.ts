@@ -20,7 +20,7 @@ const orderSchema = new Schema(
         },
         item: {
           type: Types.ObjectId,
-          subRef: 'Product.available'
+          ref: 'Product.available'
         }
       }
     ],
@@ -61,8 +61,7 @@ const orderSchema = new Schema(
     },
     vouchers: [
       {
-        type: Types.ObjectId,
-        ref: 'Voucher'
+        type: String
       }
     ],
     description: {
@@ -89,22 +88,37 @@ const orderSchema = new Schema(
 );
 
 orderSchema.pre('validate', async function (next): Promise<void> {
-  let discount = 0;
-  const productPrice = await this.products.reduce(async (sum, current) => {
+  const productsPrice = await this.products.reduce(async (sum, current) => {
     const product = (await Product.findOne({ _id: current.productId })) as ProductDocument;
-    return (await sum) + product.price * current.quantity;
+    const productFinalPrice = await Order.calculateProductPrice(product, this.vouchers);
+    return (await sum) + productFinalPrice * current.quantity;
   }, 0);
-
-  if (this.vouchers) {
-    discount = await this.vouchers.reduce(async (sum, current) => {
-      const voucher = (await Voucher.findOne({ _id: current })) as VoucherDocument;
-      return (await sum) + voucher.discount;
-    }, 0);
-  }
-
-  this.totalPrice = productPrice - (productPrice * discount) / 100;
+  this.totalPrice = productsPrice < 0 ? 0 : productsPrice;
   next();
 });
+
+orderSchema.statics.calculateProductPrice = async function (
+  product: ProductDocument,
+  vouchers: Array<VoucherDocument>
+): Promise<number> {
+  let totalDiscount = product.discount | 0;
+
+  const voucherDocs = await Voucher.find({ code: { $in: vouchers } });
+
+  if (voucherDocs.length) {
+    voucherDocs.map((voucher) => {
+      if (voucher.expiresIn > new Date()) {
+        if (voucher.category && voucher.category?.toString() === product.category.toString()) {
+          totalDiscount += voucher.discount;
+        } else if (!voucher.category) {
+          totalDiscount += voucher.discount;
+        }
+      }
+    });
+  }
+
+  return product.price - (product.price * totalDiscount) / 100;
+};
 
 const Order = (models.Order as OrderModel) || model<OrderDocument, OrderModel>('Order', orderSchema);
 

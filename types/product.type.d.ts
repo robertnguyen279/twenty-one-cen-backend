@@ -1,4 +1,4 @@
-import { Document, Model } from 'mongoose';
+import { Document, Types, Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
 export enum Size {
@@ -27,23 +27,24 @@ export type Picure = {
   description: string;
 };
 
-export type SizeColorQuantity = {
+export interface SizeColorQuantity {
   _id: ObjectId;
   size: Size;
   color: Color;
   quantity: number;
-};
+}
 
 export interface Product {
   name: string;
   noToneName: string;
   description: string;
   urlString: string;
+  discount: number;
   pictures: Array<Picure>;
   price: number;
   sold: number;
   category: ObjectId;
-  available: Array<SizeColorQuantity>;
+  available: Types.DocumentArray<SizeColorQuantity>;
 }
 
 export interface ProductDocument extends Product, Document {
