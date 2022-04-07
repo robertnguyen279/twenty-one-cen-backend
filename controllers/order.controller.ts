@@ -114,6 +114,10 @@ export const updateOrderStatus = async (req: Request, res: Response, next: NextF
 
     order.status = status;
 
+    if (status === 'done') {
+      order.shipDate = new Date();
+    }
+
     await order.save();
 
     res.send({ statusCode: 200, message: 'Order status updated successfully' });
