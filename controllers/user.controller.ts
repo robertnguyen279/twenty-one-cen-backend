@@ -227,6 +227,16 @@ export const addContact = async (req: Request, res: Response, next: NextFunction
     filterRequestBody(addressKeys, req.body);
 
     const _id = new Types.ObjectId();
+
+    if (!req.body.firstName && !req.body.lastName) {
+      req.body.firstName = user.firstName;
+      req.body.lastName = user.lastName;
+    }
+
+    if (!req.body.phone) {
+      req.body.phone = user.phone;
+    }
+
     const contactDetail = {
       _id,
       ...req.body
@@ -257,11 +267,7 @@ export const updateContact = async (req: Request, res: Response, next: NextFunct
       throw new InvalidBodyError('phone');
     }
 
-    const doc = await User.findOneAndUpdate({ _id: user._id, 'contactDetails._id': id }, updateArgs, { new: true });
-
-    if (!doc) {
-      throw new Error('Update contact failed');
-    }
+    await User.findOneAndUpdate({ _id: user._id, 'contactDetails._id': id }, updateArgs);
 
     return res.send({ message: 'Contact updated', statusCode: 200 });
   } catch (error) {

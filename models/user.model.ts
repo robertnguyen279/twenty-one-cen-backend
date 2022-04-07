@@ -111,6 +111,14 @@ const userSchema = new Schema(
             },
             message: 'Phone is invalid'
           }
+        },
+        firstName: {
+          type: String,
+          required: true
+        },
+        lastName: {
+          type: String,
+          required: true
         }
       }
     ],

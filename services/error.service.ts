@@ -12,18 +12,33 @@ export class ExpressError extends Error implements ErrorType {
   }
 }
 
-export class InvalidBodyError extends ExpressError {
-  constructor(key) {
+export class UnprocesableError extends ExpressError {
+  constructor() {
     super();
-
-    this.message = `Invalid request body "${key}"`;
     this.statusCode = 422;
   }
 }
 
-export class InvalidQueryError extends InvalidBodyError {
+export class InvalidBodyError extends UnprocesableError {
   constructor(key) {
-    super(key);
+    super();
+
+    this.message = `Invalid request body "${key}"`;
+  }
+}
+
+export class UnavailableError extends ExpressError {
+  constructor(key) {
+    super();
+
+    this.message = `${key} not available`;
+    this.statusCode = 404;
+  }
+}
+
+export class InvalidQueryError extends UnprocesableError {
+  constructor(key) {
+    super();
 
     this.message = `Invalid request query "${key}"`;
   }
@@ -56,7 +71,7 @@ export class UnauthorizedError extends ExpressError {
   }
 }
 
-export class MissingRequestBodyError extends ExpressError {
+export class MissingRequestBodyError extends UnprocesableError {
   constructor(key) {
     super();
 
