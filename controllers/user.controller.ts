@@ -366,3 +366,21 @@ export const loginByThirdParty = async (req: Request, res: Response, next: NextF
     next(error);
   }
 };
+
+export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = (await User.findById(req.authUser?._id)) as UserDocument;
+    const { oldPassword, newPassword } = filterRequestBody(['oldPassword', 'newPassword'], req.body);
+
+    if (!user.comparePassword(oldPassword)) {
+      throw new ForbiddenError();
+    }
+
+    user.password = newPassword;
+
+    await user.save();
+    res.send({ statusCode: 200, message: 'Update password successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
