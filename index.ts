@@ -7,6 +7,7 @@ import productRoutes from 'routes/product.route';
 import voucherRoutes from 'routes/voucher.route';
 import orderRoutes from 'routes/order.route';
 import postRoutes from 'routes/post.route';
+import siteInfoRoutes from 'routes/site.route';
 import { errorLogger, errorResponder } from 'middlewares/error.middleware';
 const app = express();
 
@@ -17,6 +18,7 @@ app.use('/product', productRoutes);
 app.use('/voucher', voucherRoutes);
 app.use('/order', orderRoutes);
 app.use('/post', postRoutes);
+app.use('/site', siteInfoRoutes);
 
 app.use(errorLogger);
 app.use(errorResponder);
