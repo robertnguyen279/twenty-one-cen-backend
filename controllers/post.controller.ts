@@ -13,7 +13,7 @@ export const createPost = async (req: Request, res: Response, next: NextFunction
 
     await post.save();
 
-    res.send({ statusCode: 200, message: 'Create post successfully' });
+    res.status(201).send({ statusCode: 201, message: 'Create post successfully' });
   } catch (error) {
     next(error);
   }

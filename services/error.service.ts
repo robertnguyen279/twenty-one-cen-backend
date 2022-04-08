@@ -79,3 +79,11 @@ export class MissingRequestBodyError extends UnprocesableError {
     this.statusCode = 422;
   }
 }
+
+export class WrongPasswordError extends ForbiddenError {
+  constructor() {
+    super();
+
+    this.message = 'Wrong password';
+  }
+}

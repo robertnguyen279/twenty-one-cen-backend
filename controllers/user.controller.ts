@@ -4,7 +4,7 @@ import { filterRequestBody } from 'services/common.service';
 import { UserDocument } from 'types/user.type';
 import { Types } from 'mongoose';
 import validator from 'validator';
-import { NotFoundError, ForbiddenError, InvalidBodyError, InvalidQueryError } from 'services/error.service';
+import { NotFoundError, WrongPasswordError, InvalidBodyError, InvalidQueryError } from 'services/error.service';
 import axios from 'axios';
 
 const signupKeys = ['firstName', 'lastName', 'email', 'password*', 'phone', 'avatarUrl', 'birthday'];
@@ -52,7 +52,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
     }
 
     if (!user.comparePassword(password)) {
-      throw new ForbiddenError();
+      throw new WrongPasswordError();
     }
 
     const accessToken = await user.generateAccessToken();
@@ -373,7 +373,7 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
     const { oldPassword, newPassword } = filterRequestBody(['oldPassword', 'newPassword'], req.body);
 
     if (!user.comparePassword(oldPassword)) {
-      throw new ForbiddenError();
+      throw new WrongPasswordError();
     }
 
     user.password = newPassword;

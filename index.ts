@@ -7,7 +7,9 @@ import productRoutes from 'routes/product.route';
 import voucherRoutes from 'routes/voucher.route';
 import orderRoutes from 'routes/order.route';
 import postRoutes from 'routes/post.route';
-import { errorLogger, errorResponder } from 'middlewares/error.middleware';
+import siteInfoRoutes from 'routes/site.route';
+import carouselRoutes from 'routes/carousel.route';
+import { errorLogger, errorResponder, invalidPathHandler } from 'middlewares/error.middleware';
 const app = express();
 
 app.use(morgan('dev'));
@@ -17,7 +19,10 @@ app.use('/product', productRoutes);
 app.use('/voucher', voucherRoutes);
 app.use('/order', orderRoutes);
 app.use('/post', postRoutes);
+app.use('/site', siteInfoRoutes);
+app.use('/carousel', carouselRoutes);
 
+app.use(invalidPathHandler);
 app.use(errorLogger);
 app.use(errorResponder);
 
