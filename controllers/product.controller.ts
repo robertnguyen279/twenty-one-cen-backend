@@ -192,7 +192,7 @@ export const getByUrlString = async (req: Request, res: Response, next: NextFunc
     res.send({
       statusCode: 200,
       message: 'Get product successfully',
-      product: { ...product._doc, actualPrice: product.actualPrice }
+      product: { ...product._doc, actualPrice: product.actualPrice, totalQuantity: product.totalQuantity }
     });
   } catch (error) {
     next(error);
