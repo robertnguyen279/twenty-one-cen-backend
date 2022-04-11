@@ -1,6 +1,7 @@
 import serverless from 'serverless-http';
 import express from 'express';
 import morgan from 'morgan';
+import cors from 'cors';
 import connectToDatabase from 'services/mongoose.service';
 import userRoutes from 'routes/user.route';
 import productRoutes from 'routes/product.route';
@@ -13,6 +14,7 @@ import { errorLogger, errorResponder, invalidPathHandler } from 'middlewares/err
 const app = express();
 
 app.use(morgan('dev'));
+app.use(cors());
 app.use(express.json());
 app.use('/user', userRoutes);
 app.use('/product', productRoutes);

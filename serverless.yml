@@ -33,3 +33,4 @@ functions:
     handler: index.handler
     events:
       - httpApi: '*'
+      - cors: true
