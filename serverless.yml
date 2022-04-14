@@ -23,9 +23,6 @@ provider:
     JWT_ACCESS_TIME: ${file(env.yml):JWT_ACCESS_TIME}
     JWT_REFRESH_SECRET: ${file(env.yml):JWT_REFRESH_SECRET}
     JWT_REFRESH_TIME: ${file(env.yml):JWT_REFRESH_TIME}
-    GOOGLE_CLIENT_ID: ${file(env.yml):GOOGLE_CLIENT_ID}
-    GOOGLE_CLIENT_SECRET: ${file(env.yml):GOOGLE_CLIENT_SECRET}
-
 plugins:
   - serverless-webpack
   - serverless-offline

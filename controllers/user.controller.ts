@@ -219,7 +219,13 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
       .sort([[sortBy, order]])
       .select('-refreshToken -password');
 
-    return res.send({ message: 'Get users successfully', statusCode: 200, users });
+    const deepCloneUsers = JSON.parse(JSON.stringify(users));
+
+    deepCloneUsers.forEach((user) => {
+      user.fullName = user.firstName + ' ' + user.lastName;
+    });
+
+    return res.send({ message: 'Get users successfully', statusCode: 200, users: deepCloneUsers });
   } catch (error) {
     next(error);
   }
