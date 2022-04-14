@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { ErrorType } from 'types/error.type';
 
 export const errorLogger = (error: ErrorType, req: Request, res: Response, next: NextFunction) => {
+  console.log('hihi');
   console.error('\x1b[31m', error); // adding some color to our logs
   req.error = error;
   next(); // calling next middleware

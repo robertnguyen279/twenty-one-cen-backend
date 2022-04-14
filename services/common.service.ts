@@ -1,10 +1,27 @@
-import { InvalidBodyError } from 'services/error.service';
+import { InvalidBodyError, MissingRequestBodyError } from 'services/error.service';
 
 export const filterRequestBody = <T>(validKeys: Array<string>, requestBody: T) => {
+  const cleanValidKeys = validKeys.map((key) => {
+    if (key.slice(-1) === '*') {
+      return key.slice(0, -1);
+    }
+    return key;
+  });
+
+  const requiredKey = validKeys.filter((key) => key.slice(-1) === '*').map((key) => key.slice(0, -1));
+
   for (const key in requestBody) {
-    if (!validKeys.includes(key)) {
+    if (!cleanValidKeys.includes(key)) {
       throw new InvalidBodyError(key);
     }
+  }
+
+  if (requiredKey.length) {
+    requiredKey.map((key) => {
+      if (!Object.keys(requestBody).includes(key)) {
+        throw new MissingRequestBodyError(key);
+      }
+    });
   }
 
   return requestBody;
@@ -38,7 +55,9 @@ export const removeVietnameseTones = (str: string): string => {
   /*eslint-disable */
   str = str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g, ' ');
   /*eslint-enable */
-  return str;
+  return str.toLowerCase();
 };
 
 export const transformNameToUrl = (str: string): string => `${str.toLowerCase().split(' ').join('-')}-${Date.now()}`;
+
+export const parseQueryText = (text: string): string => text.split('-').join(' ').toLowerCase();

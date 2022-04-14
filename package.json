@@ -24,6 +24,7 @@
     "@types/passport-google-oauth2": "^0.1.5",
     "@types/redis": "^4.0.11",
     "@types/validator": "^13.7.2",
+    "@types/voucher-code-generator": "^1.1.1",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
     "aws-serverless-express": "3.3.8",
@@ -54,6 +55,7 @@
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "typescript": "^4.6.3",
     "validator": "^13.7.0",
+    "voucher-code-generator": "^1.2.0",
     "webpack": "^5.70.0",
     "webpack-node-externals": "^3.0.0"
   },

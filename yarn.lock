@@ -1669,6 +1669,11 @@
   resolved "https://registry.yarnpkg.com/@types/validator/-/validator-13.7.2.tgz#a2114225d9be743fb154b06c29b8257aaca42922"
   integrity sha512-KFcchQ3h0OPQgFirBRPZr5F/sVjxZsOrQHedj3zi8AH3Zv/hOLx2OLR4hxR5HcfoU+33n69ZuOfzthKVdMoTiw==
 
+"@types/voucher-code-generator@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@types/voucher-code-generator/-/voucher-code-generator-1.1.1.tgz#ef8111542f26715a4ee3537e511b7aa210fccba4"
+  integrity sha512-dZhAoZAdHh919PR818EbEGM2ax08DOwgqACQh1lpA5M0dXi7He/ngVyzujtj7/OPhDx/1gQtKRICQigXxKG+Xg==
+
 "@types/webidl-conversions@*":
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/@types/webidl-conversions/-/webidl-conversions-6.1.1.tgz#e33bc8ea812a01f63f90481c666334844b12a09e"
@@ -6887,6 +6892,11 @@ velocityjs@^2.0.6:
   integrity sha512-QMYLeYLBX6eqekCin3OPmDAHapaUx3foNFE264ml1/yxRZ8TUUlI1+u6rtN4E8tKNqwzpRPeNgJtjLbgRNK4fw==
   dependencies:
     debug "^4.3.3"
+
+voucher-code-generator@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/voucher-code-generator/-/voucher-code-generator-1.2.0.tgz#667cadf122ef0f69a1c13bdbbcb5e2c8dfb840dc"
+  integrity sha512-/UgsDKpkvCe8m0BLsZkZuWqlJJlOSQwEfW0kR4vWgZPip6fDnUcDBydKET7pStk2OdEWyTpHGtWf8y7gJJxsVg==
 
 watchpack@^2.3.1:
   version "2.3.1"

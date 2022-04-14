@@ -1,6 +1,7 @@
 import { Schema, model, models, Types } from 'mongoose';
 import { ProductDocument, ProductModel } from 'types/product.type';
 import { removeVietnameseTones, transformNameToUrl } from 'services/common.service';
+import validator from 'validator';
 
 const productSchema = new Schema(
   {
@@ -19,6 +20,12 @@ const productSchema = new Schema(
       required: true,
       trim: true
     },
+    discount: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 0
+    },
     urlString: {
       type: String,
       required: true,
@@ -26,14 +33,21 @@ const productSchema = new Schema(
     },
     category: {
       type: Types.ObjectId,
-      required: true
+      required: true,
+      ref: 'Category'
     },
     pictures: [
       {
         pictureUrl: {
           type: String,
           required: true,
-          unique: true
+          unique: true,
+          validate: {
+            validator: (url: string) => {
+              return validator.isURL(url);
+            },
+            message: 'Invalid url.'
+          }
         },
         description: {
           type: String,
@@ -59,7 +73,13 @@ const productSchema = new Schema(
         },
         quantity: {
           type: Number,
-          required: true
+          required: true,
+          min: 0
+        },
+        color: {
+          type: String,
+          required: true,
+          enum: ['blue', 'red', 'green', 'purple', 'black', 'pink', 'yellow', 'orange', 'white', 'brown']
         }
       }
     ]
@@ -75,6 +95,10 @@ productSchema.pre('validate', function (next): void {
 
 productSchema.virtual('totalQuantity').get(function (): string {
   return this.available.reduce((sum, current) => sum + current.quantity, 0);
+});
+
+productSchema.virtual('actualPrice').get(function (): number {
+  return this.price - (this.price * this.discount) / 100;
 });
 
 const Product = (models.Product as ProductModel) || model<ProductDocument, ProductModel>('Product', productSchema);

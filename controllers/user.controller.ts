@@ -4,10 +4,10 @@ import { filterRequestBody } from 'services/common.service';
 import { UserDocument } from 'types/user.type';
 import { Types } from 'mongoose';
 import validator from 'validator';
-import { NotFoundError, ForbiddenError, InvalidBodyError, InvalidQueryError } from 'services/error.service';
+import { NotFoundError, WrongPasswordError, InvalidBodyError, InvalidQueryError } from 'services/error.service';
 import axios from 'axios';
 
-const signupKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday'];
+const signupKeys = ['firstName', 'lastName', 'email', 'password*', 'phone', 'avatarUrl', 'birthday'];
 const signupByThirdPartyKeys = ['firstName', 'lastName', 'email', 'avatarUrl', 'thirdPartyToken'];
 const signupByAdminKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday', 'role'];
 const loginKeys = ['emailOrPhone', 'password'];
@@ -16,10 +16,6 @@ const addressKeys = ['province', 'district', 'addressDetail', 'phone'];
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     filterRequestBody(signupKeys, req.body);
-
-    if (!req.body.password) {
-      throw new InvalidBodyError('password');
-    }
 
     const user = new User(req.body);
 
@@ -56,7 +52,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
     }
 
     if (!user.comparePassword(password)) {
-      throw new ForbiddenError();
+      throw new WrongPasswordError();
     }
 
     const accessToken = await user.generateAccessToken();
@@ -237,6 +233,16 @@ export const addContact = async (req: Request, res: Response, next: NextFunction
     filterRequestBody(addressKeys, req.body);
 
     const _id = new Types.ObjectId();
+
+    if (!req.body.firstName && !req.body.lastName) {
+      req.body.firstName = user.firstName;
+      req.body.lastName = user.lastName;
+    }
+
+    if (!req.body.phone) {
+      req.body.phone = user.phone;
+    }
+
     const contactDetail = {
       _id,
       ...req.body
@@ -267,11 +273,7 @@ export const updateContact = async (req: Request, res: Response, next: NextFunct
       throw new InvalidBodyError('phone');
     }
 
-    const doc = await User.findOneAndUpdate({ _id: user._id, 'contactDetails._id': id }, updateArgs, { new: true });
-
-    if (!doc) {
-      throw new Error('Update contact failed');
-    }
+    await User.findOneAndUpdate({ _id: user._id, 'contactDetails._id': id }, updateArgs);
 
     return res.send({ message: 'Contact updated', statusCode: 200 });
   } catch (error) {
@@ -366,6 +368,24 @@ export const loginByThirdParty = async (req: Request, res: Response, next: NextF
     await user.save();
 
     res.send({ statusCode: 200, message: `Login by ${type} successfully`, user, accessToken, refreshToken });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = (await User.findById(req.authUser?._id)) as UserDocument;
+    const { oldPassword, newPassword } = filterRequestBody(['oldPassword', 'newPassword'], req.body);
+
+    if (!user.comparePassword(oldPassword)) {
+      throw new WrongPasswordError();
+    }
+
+    user.password = newPassword;
+
+    await user.save();
+    res.send({ statusCode: 200, message: 'Update password successfully' });
   } catch (error) {
     next(error);
   }
