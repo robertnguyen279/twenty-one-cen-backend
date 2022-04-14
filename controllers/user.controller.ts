@@ -65,7 +65,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
       message: 'Login successful',
       accessToken,
       refreshToken,
-      user: { ...user._doc, password: undefined, fullName: user.fullName }
+      user: { ...user._doc, password: undefined, fullName: user.fullName, refreshToken: undefined }
     });
   } catch (error) {
     next(error);
@@ -215,7 +215,18 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
       .sort([[sortBy, order]])
       .select('-refreshToken -password');
 
-    return res.send({ message: 'Get users successfully', statusCode: 200, users });
+    if (!users) {
+      throw new NotFoundError('Users');
+    }
+
+    const deepCloneUsers = JSON.parse(JSON.stringify(users));
+
+    deepCloneUsers.forEach((user) => {
+      user.fullName = `${user.firstName} ${user.lastName}`;
+      console.log(user.fullName);
+    });
+
+    return res.send({ message: 'Get users successfully', statusCode: 200, users: deepCloneUsers });
   } catch (error) {
     next(error);
   }
