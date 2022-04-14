@@ -223,7 +223,6 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
 
     deepCloneUsers.forEach((user) => {
       user.fullName = `${user.firstName} ${user.lastName}`;
-      console.log(user.fullName);
     });
 
     return res.send({ message: 'Get users successfully', statusCode: 200, users: deepCloneUsers });
