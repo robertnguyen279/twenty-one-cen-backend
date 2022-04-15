@@ -10,24 +10,12 @@ const userSchema = new Schema(
     firstName: {
       type: String,
       trim: true,
-      required: true,
-      validate: {
-        validator: (firstName: string) => {
-          return /^(?=.{1,50}$)[a-z]+(?:['_.\s][a-z]+)*$/gim.test(firstName);
-        },
-        message: 'First name is invalid'
-      }
+      required: true
     },
     lastName: {
       type: String,
       trim: true,
-      required: true,
-      validate: {
-        validator: (lastName: string) => {
-          return validator.isAlpha(lastName);
-        },
-        message: 'Last name is invalid'
-      }
+      required: true
     },
     email: {
       type: String,
