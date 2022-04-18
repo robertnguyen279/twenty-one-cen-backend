@@ -1,7 +1,6 @@
 import { Schema, model, models, Types } from 'mongoose';
 import { ProductDocument, ProductModel } from 'types/product.type';
 import { removeVietnameseTones, transformNameToUrl } from 'services/common.service';
-import validator from 'validator';
 
 const productSchema = new Schema(
   {
@@ -41,13 +40,7 @@ const productSchema = new Schema(
         pictureUrl: {
           type: String,
           required: true,
-          unique: true,
-          validate: {
-            validator: (url: string) => {
-              return validator.isURL(url);
-            },
-            message: 'Invalid url.'
-          }
+          unique: true
         },
         description: {
           type: String,

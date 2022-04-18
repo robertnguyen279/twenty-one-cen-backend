@@ -56,13 +56,7 @@ const userSchema = new Schema(
       }
     },
     avatarUrl: {
-      type: String,
-      validate: {
-        validator: (url: string) => {
-          return validator.isURL(url);
-        },
-        message: 'Invalid url.'
-      }
+      type: String
     },
     role: {
       type: String,
