@@ -9,19 +9,6 @@ export enum Size {
   XL = 'XL'
 }
 
-export enum Color {
-  blue = 'blue',
-  red = 'red',
-  green = 'green',
-  purple = 'purple',
-  black = 'black',
-  pink = 'pink',
-  yellow = 'yellow',
-  orange = 'orange',
-  white = 'white',
-  brown = 'brown'
-}
-
 export type Picure = {
   pictureUrl: string;
   description: string;
@@ -30,7 +17,7 @@ export type Picure = {
 export interface SizeColorQuantity {
   _id: ObjectId;
   size: Size;
-  color: Color;
+  color: string;
   quantity: number;
 }
 

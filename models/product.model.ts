@@ -77,9 +77,7 @@ const productSchema = new Schema(
           min: 0
         },
         color: {
-          type: String,
-          required: true,
-          enum: ['blue', 'red', 'green', 'purple', 'black', 'pink', 'yellow', 'orange', 'white', 'brown']
+          type: String
         }
       }
     ]
