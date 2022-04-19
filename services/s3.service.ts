@@ -22,7 +22,9 @@ export const upload = multer({
       cb(null, { fieldName: file.fieldname });
     },
     key: function (req, file, cb) {
-      const [fileName, fileType] = file.originalname.split('.');
+      console.log(file);
+      const fileName = file.originalname.split('.')[0];
+      const fileType = file.mimetype.split('/')[1];
       cb(null, `${transformNameToUrl(fileName)}-${Date.now()}.${fileType}`);
     }
   })
