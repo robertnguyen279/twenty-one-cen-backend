@@ -11,6 +11,8 @@ import postRoutes from 'routes/post.route';
 import siteInfoRoutes from 'routes/site.route';
 import carouselRoutes from 'routes/carousel.route';
 import { errorLogger, errorResponder, invalidPathHandler } from 'middlewares/error.middleware';
+import { upload, handleUploadFile } from 'services/s3.service';
+
 const app = express();
 
 app.use(morgan('dev'));
@@ -23,6 +25,7 @@ app.use('/order', orderRoutes);
 app.use('/post', postRoutes);
 app.use('/site', siteInfoRoutes);
 app.use('/carousel', carouselRoutes);
+app.post('/upload', upload.single('file'), handleUploadFile);
 
 app.use(invalidPathHandler);
 app.use(errorLogger);

@@ -6,6 +6,7 @@ declare module 'express' {
   export interface Request {
     authUser?: UserDocument;
     error: ErrorType;
+    file: any;
   }
 }
 

@@ -16,6 +16,8 @@ provider:
   region: ${opt:region, 'ap-southeast-1'}
   apiGateway:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+  binaryMediaTypes:
+    - '*/*'
   environment:
     DEBUG: '*'
     NODE_ENV: ${self:provider.stage}
@@ -24,6 +26,9 @@ provider:
     JWT_ACCESS_TIME: ${file(env.yml):JWT_ACCESS_TIME}
     JWT_REFRESH_SECRET: ${file(env.yml):JWT_REFRESH_SECRET}
     JWT_REFRESH_TIME: ${file(env.yml):JWT_REFRESH_TIME}
+    AWS_ACCESS_KEY_ID_2: ${file(env.yml):AWS_ACCESS_KEY_ID_2}
+    AWS_ACCESS_KEY_SECRET_2: ${file(env.yml):AWS_ACCESS_KEY_SECRET_2}
+    AWS_S3_BUCKET: ${file(env.yml):AWS_S3_BUCKET}
 
 plugins:
   - serverless-webpack
