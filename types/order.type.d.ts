@@ -11,7 +11,8 @@ export interface ContactDetail extends UserContactDetail {
 export enum OrderStatus {
   placed = 'placed',
   approved = 'approved',
-  done = 'done'
+  done = 'done',
+  cancelled = 'cancelled'
 }
 
 export type OrderProduct = {

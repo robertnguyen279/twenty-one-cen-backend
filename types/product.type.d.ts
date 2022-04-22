@@ -8,12 +8,6 @@ export enum Size {
   L = 'L',
   XL = 'XL'
 }
-
-export type Picure = {
-  pictureUrl: string;
-  description: string;
-};
-
 export interface SizeColorQuantity {
   _id: ObjectId;
   size: Size;
@@ -27,7 +21,7 @@ export interface Product {
   description: string;
   urlString: string;
   discount: number;
-  pictures: Array<Picure>;
+  pictures: Array<string>;
   price: number;
   sold: number;
   category: ObjectId;

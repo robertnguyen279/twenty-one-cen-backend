@@ -80,7 +80,7 @@ const orderSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ['placed', 'approved', 'done'],
+      enum: ['placed', 'approved', 'done', 'cancelled'],
       default: 'placed'
     }
   },

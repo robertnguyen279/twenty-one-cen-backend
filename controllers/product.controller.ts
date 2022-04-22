@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 import { ProductDocument, FindProductArgs } from 'types/product.type';
 import { NotFoundError } from 'services/error.service';
 
-const createProductKeys = ['name', 'description', 'pictures*', 'price', 'available*', 'category*', 'discount'];
+const createProductKeys = ['name', 'description', 'pictures*', 'price', 'available*', 'category*'];
 const updateProductKeys = ['name', 'description', 'pictures', 'price', 'available', 'category', 'discount'];
 
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {

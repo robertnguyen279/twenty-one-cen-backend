@@ -35,19 +35,9 @@ const productSchema = new Schema(
       required: true,
       ref: 'Category'
     },
-    pictures: [
-      {
-        pictureUrl: {
-          type: String,
-          required: true,
-          unique: true
-        },
-        description: {
-          type: String,
-          required: true
-        }
-      }
-    ],
+    pictures: {
+      type: Array
+    },
     price: {
       type: Number,
       required: true,
