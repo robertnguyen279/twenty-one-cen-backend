@@ -27,6 +27,7 @@ export interface Order {
   vouchers?: Array<string>;
   orderDate: Date;
   shipDate?: Date;
+  originalPrice?: number;
   totalPrice: number;
   description?: string;
   user?: ObjectId;

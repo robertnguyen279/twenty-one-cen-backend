@@ -4,6 +4,8 @@ import Order from 'models/order.model';
 import Product from 'models/product.model';
 import { ProductDocument, SizeColorQuantity } from 'types/product.type';
 import { OrderDocument } from 'types/order.type';
+import { VoucherDocument } from 'types/voucher.type';
+import Voucher from 'models/voucher.model';
 import { UnavailableError, NotFoundError } from 'services/error.service';
 import mongoose from 'mongoose';
 
@@ -64,6 +66,16 @@ export const getAnOrder = async (req: Request, res: Response, next: NextFunction
         const productDoc = (await Product.findOne({ _id: product.productId })) as ProductDocument;
         const item = productDoc.available.id(product.item);
         orderClean.products[i].item = item;
+      })
+    );
+
+    await Promise.all(
+      orderClean.vouchers.map(async (voucher, i) => {
+        const voucherDoc = (await Voucher.findOne({ code: voucher }).populate({
+          path: 'category',
+          select: 'name'
+        })) as VoucherDocument;
+        orderClean.vouchers[i] = voucherDoc;
       })
     );
 

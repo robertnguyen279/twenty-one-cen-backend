@@ -70,6 +70,10 @@ const orderSchema = new Schema(
     shipDate: {
       type: Date
     },
+    originalPrice: {
+      type: Number,
+      required: true
+    },
     totalPrice: {
       type: Number,
       required: true
@@ -93,7 +97,14 @@ orderSchema.pre('validate', async function (next): Promise<void> {
     const productFinalPrice = await Order.calculateProductPrice(product, this.vouchers);
     return (await sum) + productFinalPrice * current.quantity;
   }, 0);
+
+  const productsOriginalPrice = await this.products.reduce(async (sum, current) => {
+    const product = (await Product.findOne({ _id: current.productId })) as ProductDocument;
+    return (await sum) + product.price * current.quantity;
+  }, 0);
+
   this.totalPrice = productsPrice < 0 ? 0 : productsPrice;
+  this.originalPrice = productsOriginalPrice;
   next();
 });
 
