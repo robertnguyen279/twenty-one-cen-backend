@@ -59,6 +59,10 @@ export const getAnOrder = async (req: Request, res: Response, next: NextFunction
       .populate({ path: 'user', select: 'firstName lastName email phone' })
       .populate({ path: 'products.productId', select: 'name price' })) as OrderDocument;
 
+    if (!order) {
+      throw new NotFoundError('Order');
+    }
+
     const orderClean = JSON.parse(JSON.stringify({ ...order._doc }));
 
     await Promise.all(
@@ -154,25 +158,15 @@ export const deleteOrder = async (req: Request, res: Response, next: NextFunctio
       if (order.status === 'placed' || order.status === 'approved') {
         await Promise.all(
           order.products.map(async (product) => {
-            const productDoc = (await Product.findOne({ _id: product.productId })) as ProductDocument;
-
-            const item = productDoc.available.find((currentItem) => {
-              return currentItem._id.toString() === product.item.toString();
-            }) as SizeColorQuantity;
-
-            if (item.quantity > product.quantity) {
-              await Product.findOneAndUpdate(
-                { _id: product.productId, 'available._id': product.item },
-                {
-                  $inc: {
-                    'available.$.quantity': product.quantity
-                  }
-                },
-                { upsert: true, new: true }
-              );
-            } else {
-              throw new UnavailableError(`${productDoc.name}`);
-            }
+            await Product.findOneAndUpdate(
+              { _id: product.productId, 'available._id': product.item },
+              {
+                $inc: {
+                  'available.$.quantity': product.quantity
+                }
+              },
+              { upsert: true, new: true }
+            );
           })
         );
       }
