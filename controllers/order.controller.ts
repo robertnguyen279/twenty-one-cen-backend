@@ -57,7 +57,7 @@ export const getAnOrder = async (req: Request, res: Response, next: NextFunction
     const id = req.params.id;
     const order = (await Order.findById(id)
       .populate({ path: 'user', select: 'firstName lastName email phone' })
-      .populate({ path: 'products.productId', select: 'name' })) as OrderDocument;
+      .populate({ path: 'products.productId', select: 'name price' })) as OrderDocument;
 
     const orderClean = JSON.parse(JSON.stringify({ ...order._doc }));
 
