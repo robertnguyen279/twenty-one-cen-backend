@@ -8,7 +8,7 @@ const carouselSchema = new Schema(
       required: true,
       unique: true
     },
-    url: {
+    description: {
       type: String,
       required: true
     }

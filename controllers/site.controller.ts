@@ -46,7 +46,7 @@ export const updateSiteInfo = async (req: Request, res: Response, next: NextFunc
 
     await siteInfo[0].save();
 
-    res.send({ status: 200, message: 'Site info updated successfully' });
+    res.send({ statusCode: 200, message: 'Site info updated successfully' });
   } catch (error) {
     next(error);
   }

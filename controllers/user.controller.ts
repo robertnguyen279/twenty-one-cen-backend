@@ -8,6 +8,7 @@ import { NotFoundError, WrongPasswordError, InvalidBodyError, InvalidQueryError 
 import axios from 'axios';
 
 const signupKeys = ['firstName', 'lastName', 'email', 'password*', 'phone', 'avatarUrl', 'birthday'];
+const updateKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday'];
 const signupByThirdPartyKeys = ['firstName', 'lastName', 'email', 'avatarUrl', 'thirdPartyToken'];
 const signupByAdminKeys = ['firstName', 'lastName', 'email', 'password', 'phone', 'avatarUrl', 'birthday', 'role'];
 const loginKeys = ['emailOrPhone', 'password'];
@@ -85,7 +86,7 @@ export const getUser = (req: Request, res: Response) => {
 export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.authUser as UserDocument;
-    filterRequestBody(signupKeys, req.body);
+    filterRequestBody(updateKeys, req.body);
 
     for (const key in req.body) {
       user[key] = req.body[key];

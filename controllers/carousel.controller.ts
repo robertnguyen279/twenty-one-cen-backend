@@ -3,7 +3,7 @@ import { filterRequestBody } from 'services/common.service';
 import { UnprocesableError, NotFoundError } from 'services/error.service';
 import Carousel from 'models/carousel.model';
 
-const validCarouselKeys = ['picture', 'url'];
+const validCarouselKeys = ['picture', 'description'];
 
 export const createCarousel = async (req: Request, res: Response, next: NextFunction) => {
   try {

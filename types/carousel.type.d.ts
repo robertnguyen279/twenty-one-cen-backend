@@ -2,7 +2,7 @@ import { Document, Model } from 'mongoose';
 
 export interface Carousel {
   picture: string;
-  url: string;
+  description: string;
 }
 
 export type CarouselDocument = Carousel & Document;

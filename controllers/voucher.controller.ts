@@ -73,7 +73,7 @@ export const deleteVoucher = async (req: Request, res: Response, next: NextFunct
     if (!doc) {
       throw new NotFoundError('Voucher');
     }
-    res.send({ statucCode: 200, message: 'Voucher deleted successfully' });
+    res.send({ statusCode: 200, message: 'Voucher deleted successfully' });
   } catch (error) {
     next(error);
   }

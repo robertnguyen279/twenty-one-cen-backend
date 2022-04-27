@@ -6,8 +6,8 @@ const router = express.Router();
 import { createPost, getPosts, getPostByUrlString, updatePost, deletePost } from 'controllers/post.controller';
 
 router.post('/', authMiddleware, superviserMiddleware, createPost);
-router.get('/', authMiddleware, superviserMiddleware, getPosts);
-router.get('/:urlString', authMiddleware, superviserMiddleware, getPostByUrlString);
+router.get('/', getPosts);
+router.get('/:urlString', getPostByUrlString);
 router.patch('/:id', authMiddleware, superviserMiddleware, updatePost);
 router.delete('/:id', authMiddleware, superviserMiddleware, deletePost);
 

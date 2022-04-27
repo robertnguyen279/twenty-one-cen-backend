@@ -83,7 +83,7 @@ export const deletePost = async (req: Request, res: Response, next: NextFunction
       throw new NotFoundError('Post');
     }
 
-    res.send({ status: 200, message: 'Delete post successfully' });
+    res.send({ statusCode: 200, message: 'Delete post successfully' });
   } catch (error) {
     next(error);
   }
