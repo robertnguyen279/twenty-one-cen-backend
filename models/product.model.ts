@@ -59,7 +59,10 @@ const productSchema = new Schema(
 
 productSchema.pre('validate', function (next): void {
   this.noToneName = removeVietnameseTones(this.name);
-  this.urlString = transformNameToUrl(this.noToneName);
+  if (!this.urlString) {
+    this.urlString = transformNameToUrl(this.noToneName);
+  }
+
   next();
 });
 

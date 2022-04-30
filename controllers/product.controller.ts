@@ -30,7 +30,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         await categoryDoc.save({ session });
       }
       const availableDocs = available.map((item) => new Item({ ...item, product: productId }));
-      const itemDocs = await Item.insertMany(availableDocs);
+      const itemDocs = await Item.insertMany(availableDocs, { session });
       const availableIds = itemDocs.map((item) => item._id);
 
       const product = new Product({
@@ -67,6 +67,7 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
       filterRequestBody(updateProductKeys, req.body);
 
       const product = (await Product.findById(id)) as ProductDocument;
+      const availableIds: Array<any> = [];
 
       if (req.body.category) {
         let category: CategoryDocument | null;
@@ -79,8 +80,33 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
         product.category = category._id;
       }
 
+      if (req.body.available) {
+        await Promise.all(
+          req.body.available.map(async (item) => {
+            if (item._id) {
+              await Item.findOneAndUpdate(
+                { _id: item._id },
+                {
+                  size: item.size,
+                  quantity: item.quantity,
+                  color: item.color || undefined,
+                  product: product._id
+                }
+              );
+              availableIds.push(item._id);
+            } else {
+              const newItem = new Item({ ...item, product: product._id });
+              await newItem.save();
+              availableIds.push(newItem._id);
+            }
+          })
+        );
+      }
+
+      product.available = availableIds;
+
       for (const key in req.body) {
-        if (key !== 'category') {
+        if (key !== 'category' && key !== 'available') {
           product[key] = req.body[key];
         }
       }
@@ -188,6 +214,7 @@ export const getByUrlString = async (req: Request, res: Response, next: NextFunc
 
     const product = await Product.findOne({ urlString })
       .populate({ path: 'category', select: 'name' })
+      .populate({ path: 'available', select: 'size color quantity' })
       .select('-noToneName');
 
     if (!product) {
@@ -204,21 +231,21 @@ export const getByUrlString = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const countAvailable = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const id = req.params.id;
+// export const countAvailable = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const id = req.params.id;
 
-    const product = await Product.findById(id);
+//     const product = await Product.findById(id);
 
-    const size = req.query.size ? (req.query.size as string) : '';
-    const color = req.query.color ? (req.query.color as string) : '';
+//     const size = req.query.size ? (req.query.size as string) : '';
+//     const color = req.query.color ? (req.query.color as string) : '';
 
-    const filterAvailable = product?.available.filter((item) => item.size.includes(size) && item.color.includes(color));
+//     const filterAvailable = product?.available.filter((item) => item.size.includes(size) && item.color.includes(color));
 
-    const countAvailable = filterAvailable?.reduce((sum, current) => sum + current.quantity, 0);
+//     const countAvailable = filterAvailable?.reduce((sum, current) => sum + current.quantity, 0);
 
-    res.send({ statusCode: 200, message: 'Get count product successfully', count: countAvailable });
-  } catch (error) {
-    next(error);
-  }
-};
+//     res.send({ statusCode: 200, message: 'Get count product successfully', count: countAvailable });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
