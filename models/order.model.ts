@@ -10,17 +10,13 @@ const orderSchema = new Schema(
   {
     products: [
       {
-        productId: {
-          type: Types.ObjectId,
-          ref: 'Product'
-        },
         quantity: {
           type: Number,
           required: true
         },
         item: {
           type: Types.ObjectId,
-          ref: 'Product.available'
+          ref: 'Item'
         }
       }
     ],

@@ -49,19 +49,8 @@ const productSchema = new Schema(
     },
     available: [
       {
-        size: {
-          type: String,
-          enum: ['XS', 'S', 'M', 'L', 'XL'],
-          required: true
-        },
-        quantity: {
-          type: Number,
-          required: true,
-          min: 0
-        },
-        color: {
-          type: String
-        }
+        type: Types.ObjectId,
+        ref: 'Item'
       }
     ]
   },

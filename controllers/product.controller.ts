@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import Product from 'models/product.model';
 import Category from 'models/category.model';
+import Item from 'models/item.model';
 import { filterRequestBody, parseQueryText } from 'services/common.service';
 import { CategoryDocument } from 'types/category.type';
 import mongoose from 'mongoose';
@@ -28,14 +29,18 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         categoryDoc = new Category({ name: category });
         await categoryDoc.save({ session });
       }
+      const availableDocs = available.map((item) => new Item({ ...item, product: productId }));
+      const itemDocs = await Item.insertMany(availableDocs);
+      const availableIds = itemDocs.map((item) => item._id);
 
+      console.log(availableDocs);
       const product = new Product({
         _id: productId,
         name,
         description,
         pictures,
+        available: availableIds,
         price,
-        available,
         category: categoryDoc._id
       });
 
