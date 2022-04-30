@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 import { ProductDocument, FindProductArgs } from 'types/product.type';
 import { NotFoundError } from 'services/error.service';
 
-const createProductKeys = ['name', 'description', 'pictures*', 'price', 'available*', 'category*'];
+const createProductKeys = ['name', 'description', 'pictures*', 'price', 'available*', 'category*', 'discount'];
 const updateProductKeys = ['name', 'description', 'pictures', 'price', 'available', 'category', 'discount'];
 
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
@@ -17,7 +17,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
 
   await session.withTransaction(async () => {
     try {
-      const { name, description, pictures, price, available, category } = filterRequestBody(
+      const { name, description, pictures, price, available, category, discount } = filterRequestBody(
         createProductKeys,
         req.body
       );
@@ -33,7 +33,6 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
       const itemDocs = await Item.insertMany(availableDocs);
       const availableIds = itemDocs.map((item) => item._id);
 
-      console.log(availableDocs);
       const product = new Product({
         _id: productId,
         name,
@@ -41,6 +40,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         pictures,
         available: availableIds,
         price,
+        discount: discount ? discount : 0,
         category: categoryDoc._id
       });
 
