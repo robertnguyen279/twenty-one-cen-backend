@@ -63,7 +63,7 @@ export const getAnOrder = async (req: Request, res: Response, next: NextFunction
       orderClean.products.map(async (product, i) => {
         orderClean.products[i].item = await Item.findById(product.item).populate({
           path: 'product',
-          select: 'name price discount'
+          select: 'name price discount pictures'
         });
       })
     );
@@ -101,7 +101,6 @@ export const getOrders = async (req: Request, res: Response, next: NextFunction)
 
     const orders = await Order.find(findArgs)
       .populate({ path: 'user', select: 'firstName lastName email phone' })
-      .populate({ path: 'products.productId', select: 'name' })
       .skip(skip)
       .limit(limit)
       .sort([[sortBy, order]]);

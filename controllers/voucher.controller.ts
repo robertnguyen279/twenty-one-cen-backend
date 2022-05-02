@@ -37,7 +37,9 @@ export const getVoucherById = async (req: Request, res: Response, next: NextFunc
 
 export const getAllVouchers = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const vouchers = await Voucher.find().populate({ path: 'category', select: 'name' });
+    const vouchers = await Voucher.find()
+      .populate({ path: 'category', select: 'name' })
+      .sort([['createdAt', 'desc']]);
 
     res.send({ statusCode: 200, message: 'Get all voucher successfully', vouchers });
   } catch (error) {
