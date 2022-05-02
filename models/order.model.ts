@@ -1,9 +1,10 @@
 import { Schema, model, models, Types } from 'mongoose';
 import { OrderDocument, OrderModel } from 'types/order.type';
 import { ProductDocument } from 'types/product.type';
+import { ItemDocument } from 'types/item.type';
 import { VoucherDocument } from 'types/voucher.type';
 import validator from 'validator';
-import Product from 'models/product.model';
+import Item from 'models/item.model';
 import Voucher from 'models/voucher.model';
 
 const orderSchema = new Schema(
@@ -89,13 +90,21 @@ const orderSchema = new Schema(
 
 orderSchema.pre('validate', async function (next): Promise<void> {
   const productsPrice = await this.products.reduce(async (sum, current) => {
-    const product = (await Product.findOne({ _id: current.productId })) as ProductDocument;
-    const productFinalPrice = await Order.calculateProductPrice(product, this.vouchers);
+    const item = (await Item.findById(current.item).populate({
+      path: 'product',
+      select: 'name price discount category'
+    })) as ItemDocument;
+
+    const productFinalPrice = await Order.calculateProductPrice(item, this.vouchers);
     return (await sum) + productFinalPrice * current.quantity;
   }, 0);
 
   const productsOriginalPrice = await this.products.reduce(async (sum, current) => {
-    const product = (await Product.findOne({ _id: current.productId })) as ProductDocument;
+    const item = (await Item.findById(current.item).populate({
+      path: 'product',
+      select: 'name price discount'
+    })) as ItemDocument;
+    const product = item.product as ProductDocument;
     return (await sum) + product.price * current.quantity;
   }, 0);
 
@@ -105,9 +114,10 @@ orderSchema.pre('validate', async function (next): Promise<void> {
 });
 
 orderSchema.statics.calculateProductPrice = async function (
-  product: ProductDocument,
+  item: ItemDocument,
   vouchers: Array<VoucherDocument>
 ): Promise<number> {
+  const product = item.product as ProductDocument;
   let totalDiscount = product.discount | 0;
 
   const voucherDocs = await Voucher.find({ code: { $in: vouchers } });
@@ -115,7 +125,7 @@ orderSchema.statics.calculateProductPrice = async function (
   if (voucherDocs.length) {
     voucherDocs.map((voucher) => {
       if (voucher.expiresIn > new Date()) {
-        if (voucher.category && voucher.category?.toString() === product.category.toString()) {
+        if (voucher.category && voucher.category.toString() === product.category.toString()) {
           totalDiscount += voucher.discount;
         } else if (!voucher.category) {
           totalDiscount += voucher.discount;

@@ -10,6 +10,10 @@ const productSchema = new Schema(
       trim: true,
       unique: true
     },
+    code: {
+      type: String,
+      required: true
+    },
     noToneName: {
       type: String,
       required: true

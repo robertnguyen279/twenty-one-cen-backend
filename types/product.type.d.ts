@@ -1,16 +1,9 @@
 import { Document, Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
-export enum Size {
-  XS = 'XS',
-  S = 'S',
-  M = 'M',
-  L = 'L',
-  XL = 'XL'
-}
-
 export interface Product {
   name: string;
+  code: string;
   noToneName: string;
   description: string;
   urlString: string;

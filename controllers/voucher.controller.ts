@@ -2,21 +2,14 @@ import { Request, Response, NextFunction } from 'express';
 import Voucher from 'models/voucher.model';
 import { filterRequestBody } from 'services/common.service';
 import { NotFoundError } from 'services/error.service';
-import voucherCodeGenerator from 'voucher-code-generator';
 
-const validVoucherKeys = ['description', 'category', 'expiresIn', 'discount', 'public'];
+const validVoucherKeys = ['description', 'category', 'expiresIn', 'discount', 'public', 'code'];
 
 export const createVoucher = async (req: Request, res: Response, next: NextFunction) => {
   try {
     filterRequestBody(validVoucherKeys, req.body);
 
-    const voucherCode = voucherCodeGenerator.generate({
-      length: 8,
-      charset: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-      count: 1
-    })[0];
-
-    const voucher = new Voucher({ code: voucherCode, ...req.body });
+    const voucher = new Voucher(req.body);
 
     await voucher.save();
 

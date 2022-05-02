@@ -1,7 +1,7 @@
 import { Document, Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { UserContactDetail } from './user.type';
-import { ProductDocument } from 'types/product.type';
+import { ItemDocument } from 'types/item.type';
 import { VoucherDocument } from 'types/voucher.type';
 
 export interface ContactDetail extends UserContactDetail {
@@ -39,5 +39,5 @@ export interface OrderDocument extends Order, Document {
 }
 
 export interface OrderModel extends Model<OrderDocument> {
-  calculateProductPrice(product: ProductDocument, vouchers: Array<VoucherDocument>): number;
+  calculateProductPrice(item: ItemDocument, vouchers: Array<VoucherDocument>): number;
 }

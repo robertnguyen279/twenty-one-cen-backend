@@ -1,5 +1,6 @@
 import { Document, Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
+import { ProductDocument } from './product.type';
 export enum Size {
   XS = 'XS',
   S = 'S',
@@ -13,7 +14,7 @@ export interface Item {
   size: Size;
   color: string;
   quantity: number;
-  productId: ObjectId;
+  product: ObjectId | ProductDocument;
 }
 
 export interface ItemDocument extends Item, Document {

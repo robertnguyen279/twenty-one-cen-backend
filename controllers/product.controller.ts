@@ -8,8 +8,8 @@ import mongoose from 'mongoose';
 import { ProductDocument, FindProductArgs } from 'types/product.type';
 import { NotFoundError } from 'services/error.service';
 
-const createProductKeys = ['name', 'description', 'pictures*', 'price', 'available*', 'category*', 'discount'];
-const updateProductKeys = ['name', 'description', 'pictures', 'price', 'available', 'category', 'discount'];
+const createProductKeys = ['name', 'description', 'pictures*', 'price', 'available*', 'category*', 'discount', 'code'];
+const updateProductKeys = ['name', 'description', 'pictures', 'price', 'available', 'category', 'discount', 'code'];
 
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
   const session = await mongoose.startSession();
@@ -17,7 +17,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
 
   await session.withTransaction(async () => {
     try {
-      const { name, description, pictures, price, available, category, discount } = filterRequestBody(
+      const { name, description, pictures, price, available, category, discount, code } = filterRequestBody(
         createProductKeys,
         req.body
       );
@@ -40,6 +40,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         pictures,
         available: availableIds,
         price,
+        code,
         discount: discount ? discount : 0,
         category: categoryDoc._id
       });

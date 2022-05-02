@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { filterRequestBody } from 'services/common.service';
 import Order from 'models/order.model';
-import Product from 'models/product.model';
-import { ProductDocument, SizeColorQuantity } from 'types/product.type';
+import { ProductDocument } from 'types/product.type';
+import { ItemDocument } from 'types/item.type';
+import Item from 'models/item.model';
 import { OrderDocument } from 'types/order.type';
 import { VoucherDocument } from 'types/voucher.type';
 import Voucher from 'models/voucher.model';
@@ -21,24 +22,16 @@ export const placeOrder = async (req: Request, res: Response, next: NextFunction
       const order = new Order({ _id: orderId, ...req.body });
       await Promise.all(
         products.map(async (product) => {
-          const productDoc = (await Product.findOne({ _id: product.productId })) as ProductDocument;
-
-          const item = productDoc.available.find((currentItem) => {
-            return currentItem._id.toString() === product.item;
-          }) as SizeColorQuantity;
-
+          const item = (await Item.findById(product.item).populate({
+            path: 'product',
+            select: 'name'
+          })) as ItemDocument;
           if (item.quantity > product.quantity) {
-            await Product.findOneAndUpdate(
-              { _id: product.productId, 'available._id': product.item },
-              {
-                $inc: {
-                  'available.$.quantity': -product.quantity
-                }
-              },
-              { upsert: true, new: true }
-            );
+            item.quantity = item.quantity - product.quantity;
+            await item.save();
           } else {
-            throw new UnavailableError(`${productDoc.name}`);
+            const product = item.product as ProductDocument;
+            throw new UnavailableError(`${product.name}`);
           }
         })
       );
@@ -55,9 +48,10 @@ export const placeOrder = async (req: Request, res: Response, next: NextFunction
 export const getAnOrder = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id;
-    const order = (await Order.findById(id)
-      .populate({ path: 'user', select: 'firstName lastName email phone' })
-      .populate({ path: 'products.productId', select: 'name price pictures' })) as OrderDocument;
+    const order = (await Order.findById(id).populate({
+      path: 'user',
+      select: 'firstName lastName email phone'
+    })) as OrderDocument;
 
     if (!order) {
       throw new NotFoundError('Order');
@@ -67,9 +61,10 @@ export const getAnOrder = async (req: Request, res: Response, next: NextFunction
 
     await Promise.all(
       orderClean.products.map(async (product, i) => {
-        const productDoc = (await Product.findOne({ _id: product.productId })) as ProductDocument;
-        const item = productDoc.available.id(product.item);
-        orderClean.products[i].item = item;
+        orderClean.products[i].item = await Item.findById(product.item).populate({
+          path: 'product',
+          select: 'name price discount'
+        });
       })
     );
 
@@ -158,15 +153,9 @@ export const deleteOrder = async (req: Request, res: Response, next: NextFunctio
       if (order.status === 'placed' || order.status === 'approved') {
         await Promise.all(
           order.products.map(async (product) => {
-            await Product.findOneAndUpdate(
-              { _id: product.productId, 'available._id': product.item },
-              {
-                $inc: {
-                  'available.$.quantity': product.quantity
-                }
-              },
-              { upsert: true, new: true }
-            );
+            const item = (await Item.findById(product.item)) as ItemDocument;
+            item.quantity = product.quantity + item.quantity;
+            await item.save();
           })
         );
       }
